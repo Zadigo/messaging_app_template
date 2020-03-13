@@ -1,0 +1,58 @@
+.forum .windows .threads-window, .forum .windows .messages-window {
+  height: 400px;
+  overflow-x: hidden;
+  overflow-x: auto;
+  text-align: justify;
+  background-color: blueviolet;
+  padding: .75rem;
+  margin-bottom: 1rem;
+}
+
+.forum .windows {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+}
+
+.forum .windows .threads-window {
+  background-color: black;
+  width: 20%;
+  margin-right: .5rem;
+}
+
+.forum .windows .threads-window .thread {
+  background-color: white;
+  height: 50px;
+  padding: .5rem;
+  cursor: pointer;
+}
+
+.forum .windows .messages-window {
+  width: 80%;
+}
+
+.forum .windows .messages-window .message {
+  background-color: white;
+  height: auto;
+  width: 100%;
+  padding: 1rem;
+}
+
+.forum .windows .messages-window .message:not(:first-child) {
+  margin-top: .5rem;
+}
+
+.forum .windows .messages-window .message:nth-child(odd) {
+  background-color: lightgrey;
+}
+
+.forum #message-textbox {
+  height: 150px;
+  padding: 1rem;
+  resize: none;
+}
+/*# sourceMappingURL=messages.css.map */

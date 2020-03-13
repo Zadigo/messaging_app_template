@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'messages.css' %}">
+    <style>
+        .reported_thread-leave-active {
+            transition: all .3s ease-out;
+        }
+        .reported_thread-leave {
+            opacity: 1;
+        }
+        .reported_thread-leave-to {
+            opacity: 0;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <section class="section">
+        <div id="messagesapp">
+            <mymessages @createnewmessage="showcreatedmessage" v-bind:messages="messagelist" />
+        </div>
+    </section>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script src="{% static 'messages.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,57 @@
+%window {
+    height: 400px;
+    overflow-x: hidden; 
+    overflow-x: auto; 
+    text-align:justify;
+    background-color: blueviolet;
+    padding: .75rem;
+    margin-bottom: 1rem;
+}
+
+.forum {
+    .windows {
+        display: flex;
+        flex-direction: row;
+
+        .threads-window {
+            @extend %window;
+            background-color: black;   
+            width: 20%;
+            margin-right: .5rem;
+
+            .thread {
+                background-color: white;
+                height: 50px;
+                padding: .5rem;
+                cursor: pointer;
+            }
+        }
+
+        .messages-window {
+            @extend %window;
+            width: 80%;
+    
+            .message {
+                background-color: white;
+                height: auto;
+                width: 100%;
+                padding: 1rem;
+    
+                &:not(:first-child) {
+                    margin-top: .5rem;
+                }
+    
+                &:nth-child(odd) {
+                    background-color: lightgrey;
+                }
+            }
+        }
+    }
+
+
+    #message-textbox {
+        height: 150px;
+        padding: 1rem;
+        resize: none;
+    }
+}
