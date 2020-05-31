@@ -1,36 +1,44 @@
-from django.shortcuts import get_object_or_404, render
+from django import http as django_http
+from django.contrib import messages
+from django.db.models import Q
+from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.views.decorators import http
 from django.views.generic import View
-from django import http as django_http
-from django.shortcuts import redirect, reverse
 
 from forum import models, serializers
-from django.contrib import messages
-from forum.utilities import create_thread_reference
+from forum import utilities
 
 
 class ForumView(View):
     def get(self, request, *args, **kwargs):
-        threads = models.MessagesThread.objects.all()
+        qfunctions = Q(from_user__exact=request.user.id) | Q(to_user__exact=request.user.id)
+        threads = models.MessagesThread.objects.filter(qfunctions)
+        if threads:
+            has_already_selected_thread = request.session.get('current_thread')
+            if has_already_selected_thread:
+                first_thread = threads.get(reference=has_already_selected_thread)
+            else:
+                # When the user reaches on the forum,
+                # we assume from the get go that he
+                # is watching the first thread
+                first_thread = threads.first()
+            messages = first_thread.message_set.all()
 
-        has_already_selected_thread = request.session.get('current_thread')
-        if has_already_selected_thread:
-            first_thread = threads.get(reference=has_already_selected_thread)
+            serialized_threads = serializers.ThreadSerializer(instance=threads, many=True)
+            serialized_messages = serializers.MessageSerializer(instance=messages, many=True)
+        
+            context = {
+                'threads': serialized_threads.data,
+                'first_thread_reference': first_thread.reference,
+                'forum_messages': serialized_messages.data
+            }
         else:
-            # When the user reaches on the forum,
-            # we assume from the get go that he
-            # is watching the first thread
-            first_thread = threads.first()
-        messages = first_thread.message_set.all()
+            context = {
+                'threads': [],
+                'first_thread_reference': False,
+                'forum_messages': []
+            }
 
-        serialized_threads = serializers.ThreadSerializer(instance=threads, many=True)
-        serialized_messages = serializers.MessageSerializer(instance=messages, many=True)
-
-        context = {
-            'threads': serialized_threads.data,
-            'first_thread_reference': first_thread.reference,
-            'forum_messages': serialized_messages.data
-        }
         return render(request, 'pages/messages.html', context=context)
 
     def post(self, request, **kwargs):
@@ -51,6 +59,11 @@ class ForumView(View):
                     'current_thread': thread.reference
                 }
                 return django_http.JsonResponse(data=data)
+
+        if method == 'createthread':
+            user = request.user
+            thread = models.MessagesThread.objects.create(reference=utilities.create_thread_reference(), from_user=user)
+            return django_http.JsonResponse(data={'thread': thread})
 
 @http.require_http_methods(['POST'])
 def new_message(request, **kwargs):

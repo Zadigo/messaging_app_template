@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import Manager
 from django.shortcuts import reverse
@@ -5,12 +6,12 @@ from django.shortcuts import reverse
 from forum.managers import MessagesManager
 from forum.utilities import create_thread_reference
 
+User = get_user_model()
 
 class MessagesThread(models.Model):
-    """Represents a thread containing various messages"""
     reference = models.CharField(max_length=100, blank=True, null=True)
-    from_user = models.PositiveIntegerField()
-    to_user = models.PositiveIntegerField()
+    from_user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name='msg_sender')
+    to_user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name='msg_receiver')
     
     reported    = models.BooleanField(default=False)
     created_on = models.DateField(auto_now_add=True)
@@ -28,16 +29,12 @@ class MessagesThread(models.Model):
             self.reference = create_thread_reference()
 
 class Message(models.Model):
-    """Messages sent from a user to another in a discussion thread"""
     thread_reference    = models.ForeignKey(MessagesThread, blank=True, on_delete=models.CASCADE)
     message             = models.TextField(blank=True, null=True)
     created_on      = models.DateField(auto_now_add=True)
 
     objects = Manager()
     messages_manager = MessagesManager().as_manager()
-
-    # def get_absolute_url(self):
-    #     return reverse('thread_message', args=[1, self.pk])
 
     def __str__(self):
         return self.thread_reference.reference

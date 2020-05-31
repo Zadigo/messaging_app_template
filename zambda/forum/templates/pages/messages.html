@@ -17,12 +17,13 @@
 {% endblock %}
 
 {% block body %}
+<h3>{{ user.get_full_name }}</h3>
 <section class="section">
     <div id="messages_app">
         <section class="section forum">
             <div class="row">
                 <div class="col s12 m12 l12">
-                    <!-- <actionbuttons v-bind:currentthread="currentthread" /> -->
+                    <actionbuttons v-bind:currentthread="currentthread" />
                 </div>
             </div>
             <div class="row">
@@ -117,9 +118,10 @@
         <div class='windows'>\
             <div class='threads-window'>\
                 <div @click='selectthread(thread)' v-for='thread in threads' :key='thread.reference' class='thread'>[[ thread.reference ]]</div>\
+                <div @click='createthread' class='thread'>Create thread</div>\
             </div>\
             <div class='messages-window'>\
-                <div v-for='message in nondeletedmessages' :key='message.id' class='message'>\
+                <div v-for='message in nondeletedmessages' :key='message.id' class='message' :class='isusermessage(message.thread_reference)'>\
                     <div class='text'>\
                         [[ message.message ]]\
                     </div>\
@@ -136,6 +138,14 @@
             }
         },
         methods: {
+            isusermessage: function(thread) {
+                var user = "{{ request.user.id }}"
+                if (user === (thread.from_user * 1)) {
+                    return "red lighten-4"
+                } else {
+                    return "grey lighten-4"
+                }
+            },
             selectthread: function(thread) {
                 this.$emit("selectthread", thread)
             },
@@ -156,14 +166,25 @@
                 }
                 xhr.open("POST", "/forum/thread/" + this.$props.currentthread + "/delete-message")
                 xhr.send(formdata)
+            },
+            createthread: function(message) {
+                var self = this
+                var formdata = new FormData()
+                formdata.append("csrfmiddlewaretoken", csrf)
+                formdata.append("method", "createthread")
+
+                var xhr = new XMLHttpRequest()
+                xhr.responseType = "json"
+                xhr.onloadend = function() {window.location.reload()}
+                xhr.open("POST", window.location.href)
+                xhr.send(formdata)
             }
         }
     }
 
     var messagesapp = new Vue({
         el: "#messages_app",
-        // components: {maininterface, messagingbox, actionbuttons},
-        components: {maininterface, messagingbox},
+        components: {maininterface, messagingbox, actionbuttons},
         delimiters: ["[[", "]]"],
         data() {
             return {
