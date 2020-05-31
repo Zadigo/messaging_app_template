@@ -9,7 +9,7 @@ class MessageAdmin(admin.ModelAdmin):
 
 @admin.register(MessagesThread)
 class MessageThreadAdmin(admin.ModelAdmin):
-    list_display = ['reference', 'to_user', 'from_user', 'created_on']
+    list_display = ['reference', 'created_on', 'reported']
     search_fields = ['reference', 'to_user', 'from_user']
     date_hierarchy = 'created_on'
     

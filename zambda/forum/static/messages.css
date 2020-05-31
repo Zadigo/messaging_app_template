@@ -1,57 +1,97 @@
 .forum .windows .threads-window, .forum .windows .messages-window {
-    height: 400px;
-    overflow-x: hidden;
-    overflow-x: auto;
-    text-align: justify;
-    background-color: blueviolet;
-    padding: .75rem;
-    margin-bottom: 1rem;
-  }
-  
-  .forum .windows {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-orient: horizontal;
-    -webkit-box-direction: normal;
-        -ms-flex-direction: row;
-            flex-direction: row;
-  }
-  
-  .forum .windows .threads-window {
-    background-color: black;
-    width: 20%;
-    margin-right: .5rem;
-  }
-  
-  .forum .windows .threads-window .thread {
-    background-color: white;
-    height: 50px;
-    padding: .5rem;
-    cursor: pointer;
-  }
-  
-  .forum .windows .messages-window {
-    width: 80%;
-  }
-  
-  .forum .windows .messages-window .message {
-    background-color: white;
-    height: auto;
-    width: 100%;
-    padding: 1rem;
-  }
-  
-  .forum .windows .messages-window .message:not(:first-child) {
-    margin-top: .5rem;
-  }
-  
-  .forum .windows .messages-window .message:nth-child(odd) {
-    background-color: lightgrey;
-  }
-  
-  .forum #message-textbox {
-    height: 150px;
-    padding: 1rem;
-    resize: none;
-  }
+  height: 400px;
+  overflow-x: hidden;
+  overflow-x: auto;
+  text-align: justify;
+  background-color: #fafafa;
+  padding: .75rem;
+  margin-bottom: 1rem;
+}
+
+.forum .windows {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+}
+
+.forum .windows .threads-window {
+  background-color: #e0e0e0;
+  width: 20%;
+  margin-right: .5rem;
+}
+
+.forum .windows .threads-window .thread {
+  background-color: white;
+  -webkit-transition: all .3s ease;
+  transition: all .3s ease;
+  height: 50px;
+  padding: .5rem;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.forum .windows .threads-window .thread:hover {
+  -webkit-transform: translateX(-3px);
+          transform: translateX(-3px);
+}
+
+.forum .windows .threads-window .thread:not(:first-child) {
+  margin-top: 1rem;
+}
+
+.forum .windows .messages-window {
+  width: 80%;
+}
+
+.forum .windows .messages-window .message {
+  position: relative;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 2px;
+  height: auto;
+  width: 100%;
+  padding: 1rem;
+}
+
+.forum .windows .messages-window .message .text {
+  max-width: 90%;
+}
+
+.forum .windows .messages-window .message:not(:first-child) {
+  margin-top: .5rem;
+}
+
+.forum .windows .messages-window .message:nth-child(odd) {
+  background-color: #f5f5f5;
+}
+
+.forum .windows .messages-window .message i {
+  position: absolute;
+  font-size: 20px;
+  top: 15px;
+  right: 15px;
+  cursor: pointer;
+  color: #9e9e9e;
+  border-radius: 50%;
+  height: 30px;
+  width: 30px;
+  text-align: center;
+  line-height: 1.5;
+  -webkit-transition: all .5s ease;
+  transition: all .5s ease;
+}
+
+.forum .windows .messages-window .message i:hover {
+  background-color: #e0e0e0;
+  color: rgba(158, 158, 158, 0.7);
+}
+
+.forum #message-textbox {
+  height: 150px;
+  padding: 1rem;
+  resize: none;
+}

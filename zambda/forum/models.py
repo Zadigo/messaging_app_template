@@ -9,10 +9,10 @@ from forum.utilities import create_thread_reference
 class MessagesThread(models.Model):
     """Represents a thread containing various messages"""
     reference = models.CharField(max_length=100, blank=True, null=True)
-
     from_user = models.PositiveIntegerField()
     to_user = models.PositiveIntegerField()
-
+    
+    reported    = models.BooleanField(default=False)
     created_on = models.DateField(auto_now_add=True)
 
     objects = Manager()

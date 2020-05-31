@@ -14,6 +14,17 @@
     <body>
         <main>
             <div class="container">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags %}{{ message.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}                    
+                {% endif %}
+
                 {% block body %}{% endblock %}
             </div>
         </main>
@@ -22,7 +33,11 @@
     <!-- JQuery -->
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 
+    <!-- Lodash -->
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script>
+
     <!-- VUEJS -->
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     {% block extra_scripts %}{% endblock %}
+    {% block vuejs_scripts %}{% endblock %}
 </html>
