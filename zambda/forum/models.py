@@ -14,6 +14,7 @@ class MessagesThread(models.Model):
     to_user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name='msg_receiver')
     
     reported    = models.BooleanField(default=False)
+    public      = models.BooleanField(default=False)
     created_on = models.DateField(auto_now_add=True)
 
     objects = Manager()

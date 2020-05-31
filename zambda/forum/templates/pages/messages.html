@@ -50,22 +50,33 @@
 
     var actionbuttons = {
         props: ["currentthread"],
+        delimiters: ["[[", "]]"],
         template: "\
             <div class='btn-group'>\
-                <div v-show='false' class='btn white black-text'><i class='material-icons'>refresh</i></div>\
-                <div @click='reportthread' class='btn white black-text'><i class='material-icons'>block</i></div>\
+                <div @click='refreshpage' class='btn white black-text'><i class='material-icons'>refresh</i></div>\
+                <div @click='reportthread' class='btn white black-text'>\
+                    <i class='material-icons left'>block</i>\
+                        [[ currentthread ]]\
+                </div>\
             </div>\
         ",
         methods: {
+            refreshpage: function() {
+                window.location.reload()
+            },
             reportthread: function() {
                 var self = this
-                $.ajax({
-                    type: "POST",
-                    url: "/api/v1/thread/" + self.$props.currentthread + "/report",
-                    dataType: "json",
-                    success: function (response) {},
-                    error: function(response) {}
-                });
+                var self = this
+                var formdata = new FormData()
+                formdata.append("csrfmiddlewaretoken", csrf)
+
+                var xhr = new XMLHttpRequest()
+                xhr.responseType = "json"
+                xhr.onloadend = function() {
+                    window.location.reload()
+                }
+                xhr.open("POST", "/forum/thread/" + this.$props.currentthread + "/report")
+                xhr.send(formdata)
             }
         }
     }
@@ -117,7 +128,7 @@
         template: "\
         <div class='windows'>\
             <div class='threads-window'>\
-                <div @click='selectthread(thread)' v-for='thread in threads' :key='thread.reference' class='thread'>[[ thread.reference ]]</div>\
+                <div @click='selectthread(thread)' v-for='thread in threads' :key='thread.reference' class='thread' :class='{\"red\": thread.reported}'>[[ thread.reference ]]</div>\
                 <div @click='createthread' class='thread'>Create thread</div>\
             </div>\
             <div class='messages-window'>\
@@ -191,7 +202,10 @@
                 threads: [],
                 messages: [],
                 currentthread: "",
-                showmessagebox: true
+                showmessagebox: true,
+
+                threadisactive: true,
+                threadisreported: false
             }
         },
         computed: {
@@ -237,6 +251,8 @@
                     self.$data.messages = forummessages
 
                     self.$data.currentthread = xhr.response.current_thread
+
+                    self.$data.threadisreported = xhr.response.is_reported
                 }
                 xhr.open("POST", window.location.href)
                 xhr.send(formdata)

@@ -11,7 +11,7 @@ from forum import utilities
 
 class ForumView(View):
     def get(self, request, *args, **kwargs):
-        qfunctions = Q(from_user__exact=request.user.id) | Q(to_user__exact=request.user.id)
+        qfunctions = Q(from_user__exact=request.user.id) | Q(to_user__exact=request.user.id) | Q(public=True)
         threads = models.MessagesThread.objects.filter(qfunctions)
         if threads:
             has_already_selected_thread = request.session.get('current_thread')
@@ -56,7 +56,8 @@ class ForumView(View):
                 serialized_messages = serializers.MessageSerializer(instance=messages, many=True)
                 data = {
                     'messages': serialized_messages.data,
-                    'current_thread': thread.reference
+                    'current_thread': thread.reference,
+                    'is_reported': thread.reported
                 }
                 return django_http.JsonResponse(data=data)
 
@@ -92,10 +93,12 @@ def delete_message(request, **kwargs):
         return redirect(reverse('forum'))
 
 @http.require_http_methods(['POST'])
-def report_thread(request):
-    # selected_thread = MessagesThread.objects.get(reference=kwargs['reference'])
-    # selected_thread.reported = True
-    # selected_thread.save()
-    # serialized_thread = serializers.ThreadSerializer(selected_thread)
-    # return Response(data=serialized_thread.data)
-    pass
+def report_thread(request, **kwargs):
+    thread = get_object_or_404(models.MessagesThread, reference=kwargs['reference'])
+    if thread:
+        thread.reported = True
+        thread.save()
+        messages.success(request, "Thread was reported", extra_tags='alert-success')
+        return django_http.JsonResponse(data={'message': thread.reference}, status=200)
+    messages.error(request, "The action could not be performed", extra_tags='alert-warning')
+    return django_http.JsonResponse(data={}, status=400)

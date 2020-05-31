@@ -12,7 +12,7 @@ class SimpleThreadSerializer(Serializer):
 class ThreadSerializer(ModelSerializer):
     class Meta:
         model = MessagesThread
-        fields = ['from_user', 'to_user', 'reference']
+        fields = ['from_user', 'to_user', 'reference', 'reported']
 
 class MessageSerializer(ModelSerializer):
     thread_reference = ThreadSerializer()
