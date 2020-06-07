@@ -14,5 +14,3 @@ services:
         container_name: "enginx"
         ports:
             - "50:80"
-        depends_on:
-            - messaging
