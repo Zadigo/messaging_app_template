@@ -24,6 +24,7 @@ EXPOSE 8000
 CMD [ "runserver", "0.0.0.0:8000" ]
 ENTRYPOINT [ "python", "/app/zambda/manage.py" ]
 # CMD pipenv run python manage.py runserver 0.0.0.0:8000
+# .. or ASGI server
+# CMD daphne zambda.asgi:application
 # ...or Gunicorn for production purposes
 # CMD gunicorn zambda.wsgi -w 4 -b 0.0.0.0:8000 --chdir=/app/zambda/ --log-file -
-# CMD gunicorn zambda.wsgi -w 4 -b 0.0.0.0:8000 --chdir=/app/zambda --log-level=debug --log-file=/var/log/gunicorn/gunicorn_log.log
