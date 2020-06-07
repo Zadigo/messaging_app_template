@@ -18,4 +18,5 @@ services:
     redis:
         build: ./docker/redis
         container_name: "redis_database"
-        ports: "6379:6379"
+        ports:
+            - "6379:6379"
