@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
     'forum',
 ]
 
@@ -58,7 +59,18 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'zambda.wsgi.application'
+# WSGI_APPLICATION = 'zambda.wsgi.application'
+
+ASGI_APPLICATION = 'zambda.routing.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],
+        },
+    },
+}
 
 
 # Database

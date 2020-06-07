@@ -43,221 +43,238 @@
 {% endblock %}
 
 {% block vuejs_scripts %}
-{{ threads|json_script:"threads" }}
-{{ forum_messages|json_script:"forum_messages" }}
-<script>
-    var csrf = $(".csrf input").val()
+    {{ threads|json_script:"threads" }}
+    {{ forum_messages|json_script:"forum_messages" }}
 
-    var actionbuttons = {
-        props: ["currentthread"],
-        delimiters: ["[[", "]]"],
-        template: "\
-            <div class='btn-group'>\
-                <div @click='refreshpage' class='btn white black-text'><i class='material-icons'>refresh</i></div>\
-                <div @click='reportthread' class='btn white black-text'>\
-                    <i class='material-icons left'>block</i>\
-                        [[ currentthread ]]\
-                </div>\
-            </div>\
-        ",
-        methods: {
-            refreshpage: function() {
-                window.location.reload()
-            },
-            reportthread: function() {
-                var self = this
-                var self = this
-                var formdata = new FormData()
-                formdata.append("csrfmiddlewaretoken", csrf)
+    <script>
+        var csrf = $(".csrf input").val()
 
-                var xhr = new XMLHttpRequest()
-                xhr.responseType = "json"
-                xhr.onloadend = function() {
-                    window.location.reload()
-                }
-                xhr.open("POST", "/forum/thread/" + this.$props.currentthread + "/report")
-                xhr.send(formdata)
-            }
-        }
-    }
-
-    var messagingbox = {
-        props: ["currentthread", "showmessagebox"],
-        template: "\
-        <transition name='reported_thread'>\
-            <div v-if='!threadreported' class='row'>\
-                <div class='col s12 m12 l12'>\
-                    <textarea v-model='newmessage' name='message' id='message-textbox' cols='30' rows='100'></textarea>\
-                    <button @click='createnewmessage' class='btn-large'>New message</button>\
-                </div>\
-            </div>\
-            <div v-else class='thread-reported'>\
-                The thread has been blocked. No messages cannot be posted until admin verficiation.\
-            </div>\
-        </transition>\
-        ",
-        data() {
-            return {
-                threadreported: false,
-                newmessage: ""
-            }
-        },
-        methods: {
-            createnewmessage: function() {
-                var self = this
-                var formdata = new FormData()
-                formdata.append("csrfmiddlewaretoken", csrf)
-                formdata.append("message", this.$data.newmessage)
-
-                var xhr = new XMLHttpRequest()
-                xhr.responseType = "json"
-                xhr.onloadend = function() {
-                    self.$data.newmessage = ""
-                    self.$emit("createnewmessage", xhr.response)      
-                }
-                xhr.open("POST", "/forum/thread/" + this.$props.currentthread + "/new-message")
-                xhr.send(formdata)
-            },
-
-        }
-    }
-
-    var maininterface = {
-        props: ["threads", "currentthread", "messages"],
-        delimiters: ["[[", "]]"],
-        template: "\
-        <div class='windows'>\
-            <div class='threads-window'>\
-                <div @click='selectthread(thread)' v-for='thread in threads' :key='thread.reference' class='thread' :class='{\"red\": thread.reported}'>[[ thread.reference ]]</div>\
-                <div @click='createthread' class='thread'>Create thread</div>\
-            </div>\
-            <div class='messages-window'>\
-                <div v-for='message in nondeletedmessages' :key='message.id' class='message' :class='isusermessage(message.thread_reference)'>\
-                    <div class='text'>\
-                        [[ message.message ]]\
+        var actionbuttons = {
+            props: ["currentthread"],
+            delimiters: ["[[", "]]"],
+            template: "\
+                <div class='btn-group'>\
+                    <div @click='refreshpage' class='btn white black-text'><i class='material-icons'>refresh</i></div>\
+                    <div @click='reportthread' class='btn white black-text'>\
+                        <i class='material-icons left'>block</i>\
+                            [[ currentthread ]]\
                     </div>\
-                    <i @click='deletemessage(message)' class='material-icons'>delete</i>\
+                </div>\
+            ",
+            methods: {
+                refreshpage: function() {
+                    window.location.reload()
+                },
+                reportthread: function() {
+                    var self = this
+                    var self = this
+                    var formdata = new FormData()
+                    formdata.append("csrfmiddlewaretoken", csrf)
+
+                    var xhr = new XMLHttpRequest()
+                    xhr.responseType = "json"
+                    xhr.onloadend = function() {
+                        window.location.reload()
+                    }
+                    xhr.open("POST", "/forum/thread/" + this.$props.currentthread + "/report")
+                    xhr.send(formdata)
+                }
+            }
+        }
+
+        var messagingbox = {
+            props: ["currentthread", "showmessagebox"],
+            template: "\
+            <transition name='reported_thread'>\
+                <div v-if='!threadreported' class='row'>\
+                    <div class='col s12 m12 l12'>\
+                        <textarea v-model='newmessage' name='message' id='message-textbox' cols='30' rows='100'></textarea>\
+                        <button @click='createnewmessage' class='btn-large'>New message</button>\
+                        <button @click='sendsocketmessage' class='btn-large red'>New message</button>\
+                    </div>\
+                </div>\
+                <div v-else class='thread-reported'>\
+                    The thread has been blocked. No messages cannot be posted until admin verficiation.\
+                </div>\
+            </transition>\
+            ",
+            data() {
+                return {
+                    threadreported: false,
+                    newmessage: ""
+                }
+            },
+            methods: {
+                sendsocketmessage: function() {
+                    var self = this
+                    
+                    const base = "ws://" + window.location.host
+                    const url = base + "/ws/forum/" + self.$props.currentthread + "/"
+                    const socket = new WebSocket(url)
+
+                    socket.onopen = function(e) {console.log("OPEN")}
+                    socket.onclose = function(e) {
+                        self.$data.newmessage = "" 
+                        console.log("CLOSE")
+                    }
+
+                    socket.send("Hello!")
+                },
+                createnewmessage: function() {
+                    var self = this
+                    var formdata = new FormData()
+                    formdata.append("csrfmiddlewaretoken", csrf)
+                    formdata.append("message", this.$data.newmessage)
+
+                    var xhr = new XMLHttpRequest()
+                    xhr.responseType = "json"
+                    xhr.onloadend = function() {
+                        self.$data.newmessage = ""
+                        self.$emit("createnewmessage", xhr.response)      
+                    }
+                    xhr.open("POST", "/forum/thread/" + this.$props.currentthread + "/new-message")
+                    xhr.send(formdata)
+                },
+
+            }
+        }
+
+        var maininterface = {
+            props: ["threads", "currentthread", "messages"],
+            delimiters: ["[[", "]]"],
+            template: "\
+            <div class='windows'>\
+                <div class='threads-window'>\
+                    <div @click='selectthread(thread)' v-for='thread in threads' :key='thread.reference' class='thread' :class='{\"red\": thread.reported}'>[[ thread.reference ]]</div>\
+                    <div @click='createthread' class='thread'>Create thread</div>\
+                </div>\
+                <div class='messages-window'>\
+                    <div v-for='message in nondeletedmessages' :key='message.id' class='message' :class='isusermessage(message.thread_reference)'>\
+                        <div class='text'>\
+                            [[ message.message ]]\
+                        </div>\
+                        <i @click='deletemessage(message)' class='material-icons'>delete</i>\
+                    </div>\
                 </div>\
             </div>\
-        </div>\
-        ",
-        computed: {
-            nondeletedmessages() {
-                return _.filter(this.$props.messages, (message) => {
-                    return message.deleted === false
-                })
-            }
-        },
-        methods: {
-            isusermessage: function(thread) {
-                var user = "{{ request.user.id }}"
-                if (user === (thread.from_user * 1)) {
-                    return "red lighten-4"
-                } else {
-                    return "grey lighten-4"
-                }
-            },
-            selectthread: function(thread) {
-                this.$emit("selectthread", thread)
-            },
-            deletemessage: function(message) {
-                var self = this
-                var formdata = new FormData()
-                formdata.append("csrfmiddlewaretoken", csrf)
-                formdata.append("messageid", message.id)
-
-                var xhr = new XMLHttpRequest()
-                xhr.responseType = "json"
-                xhr.onloadend = function() {
-                    if (xhr.status === 400) {
-                        window.location.reload()
-                    } else {
-                        message.deleted = true
-                    }
-                }
-                xhr.open("POST", "/forum/thread/" + this.$props.currentthread + "/delete-message")
-                xhr.send(formdata)
-            },
-            createthread: function(message) {
-                var self = this
-                var formdata = new FormData()
-                formdata.append("csrfmiddlewaretoken", csrf)
-                formdata.append("method", "createthread")
-
-                var xhr = new XMLHttpRequest()
-                xhr.responseType = "json"
-                xhr.onloadend = function() {window.location.reload()}
-                xhr.open("POST", window.location.href)
-                xhr.send(formdata)
-            }
-        }
-    }
-
-    var messagesapp = new Vue({
-        el: "#messages_app",
-        components: {maininterface, messagingbox, actionbuttons},
-        delimiters: ["[[", "]]"],
-        data() {
-            return {
-                threads: [],
-                messages: [],
-                currentthread: "",
-                showmessagebox: true,
-
-                threadisactive: true,
-                threadisreported: false
-            }
-        },
-        computed: {
-            messagelist() {
-                return this.$data.messages.filter(message => {
-                    return message.mark_as_delete === false
-                })
-            }
-        },
-        mounted() {
-            var self = this
-            var messages = JSON.parse($("#forum_messages").text())
-            var threads = JSON.parse($("#threads").text())
-            this.$data.threads = threads
-
-            _.forEach(messages, (message) => {
-                message["deleted"] = false
-            })
-            this.$data.messages = messages
-
-            this.$data.currentthread = "{{ first_thread_reference }}"
-        },
-        methods: {
-            showcreatedmessage: function(message) {
-                message["deleted"] = false
-                this.$data.messages.push(message)
-            },
-            viewthread: function(thread) {
-                var self = this
-                var formdata = new FormData()
-                formdata.append("csrfmiddlewaretoken", csrf)
-                formdata.append("method", "viewthread")
-                formdata.append("reference", thread.reference)
-
-                var xhr = new XMLHttpRequest()
-                xhr.responseType = "json"
-
-                xhr.onloadend = function() {
-                    var forummessages = xhr.response.messages
-                    _.forEach(forummessages, (message) => {
-                        message["deleted"] = false
+            ",
+            computed: {
+                nondeletedmessages() {
+                    return _.filter(this.$props.messages, (message) => {
+                        return message.deleted === false
                     })
-                    self.$data.messages = forummessages
-
-                    self.$data.currentthread = xhr.response.current_thread
-
-                    self.$data.threadisreported = xhr.response.is_reported
                 }
-                xhr.open("POST", window.location.href)
-                xhr.send(formdata)
+            },
+            methods: {
+                isusermessage: function(thread) {
+                    var user = "{{ request.user.id }}"
+                    if (user === (thread.from_user * 1)) {
+                        return "red lighten-4"
+                    } else {
+                        return "grey lighten-4"
+                    }
+                },
+                selectthread: function(thread) {
+                    this.$emit("selectthread", thread)
+                },
+                deletemessage: function(message) {
+                    var self = this
+                    var formdata = new FormData()
+                    formdata.append("csrfmiddlewaretoken", csrf)
+                    formdata.append("messageid", message.id)
+
+                    var xhr = new XMLHttpRequest()
+                    xhr.responseType = "json"
+                    xhr.onloadend = function() {
+                        if (xhr.status === 400) {
+                            window.location.reload()
+                        } else {
+                            message.deleted = true
+                        }
+                    }
+                    xhr.open("POST", "/forum/thread/" + this.$props.currentthread + "/delete-message")
+                    xhr.send(formdata)
+                },
+                createthread: function(message) {
+                    var self = this
+                    var formdata = new FormData()
+                    formdata.append("csrfmiddlewaretoken", csrf)
+                    formdata.append("method", "createthread")
+
+                    var xhr = new XMLHttpRequest()
+                    xhr.responseType = "json"
+                    xhr.onloadend = function() {window.location.reload()}
+                    xhr.open("POST", window.location.href)
+                    xhr.send(formdata)
+                }
             }
         }
-    })
-</script>
+
+        var messagesapp = new Vue({
+            el: "#messages_app",
+            components: {maininterface, messagingbox, actionbuttons},
+            delimiters: ["[[", "]]"],
+            data() {
+                return {
+                    threads: [],
+                    messages: [],
+                    currentthread: "",
+                    showmessagebox: true,
+
+                    threadisactive: true,
+                    threadisreported: false
+                }
+            },
+            computed: {
+                messagelist() {
+                    return this.$data.messages.filter(message => {
+                        return message.mark_as_delete === false
+                    })
+                }
+            },
+            mounted() {
+                var self = this
+                var messages = JSON.parse($("#forum_messages").text())
+                var threads = JSON.parse($("#threads").text())
+                this.$data.threads = threads
+
+                _.forEach(messages, (message) => {
+                    message["deleted"] = false
+                })
+                this.$data.messages = messages
+
+                this.$data.currentthread = "{{ first_thread_reference }}"
+            },
+            methods: {
+                showcreatedmessage: function(message) {
+                    message["deleted"] = false
+                    this.$data.messages.push(message)
+                },
+                viewthread: function(thread) {
+                    var self = this
+                    var formdata = new FormData()
+                    formdata.append("csrfmiddlewaretoken", csrf)
+                    formdata.append("method", "viewthread")
+                    formdata.append("reference", thread.reference)
+
+                    var xhr = new XMLHttpRequest()
+                    xhr.responseType = "json"
+
+                    xhr.onloadend = function() {
+                        var forummessages = xhr.response.messages
+                        _.forEach(forummessages, (message) => {
+                            message["deleted"] = false
+                        })
+                        self.$data.messages = forummessages
+
+                        self.$data.currentthread = xhr.response.current_thread
+
+                        self.$data.threadisreported = xhr.response.is_reported
+                    }
+                    xhr.open("POST", window.location.href)
+                    xhr.send(formdata)
+                }
+            }
+        })
+    </script>
 {% endblock %}
