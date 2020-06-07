@@ -1,0 +1,8 @@
+version: 3
+
+services:
+    messaging:
+        build: ./zambda
+        container_name: "messaging_app"
+        ports: "40:80"
+        volumes: .:/app
