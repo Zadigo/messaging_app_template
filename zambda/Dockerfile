@@ -5,14 +5,15 @@ ENV PYTHONDONTWRITEBYTECODE 1
 
 LABEL name="messaging v1.0"
 
-RUN mkdir /app
+# RUN mkdir /app
 
 WORKDIR /app
 
-RUN pip install --upgrade pip
+# RUN pip install --upgrade pip
 
-COPY Pipfile Pipfile
-COPY Pipfile.lock Pipfile.lock
+# COPY Pipfile Pipfile
+# COPY Pipfile.lock Pipfile.lock
+COPY Pipfile Pipfile.lock /app/
 
 RUN pip3 install "pipenv==2018.11.26"
 RUN pipenv install --deploy --system
