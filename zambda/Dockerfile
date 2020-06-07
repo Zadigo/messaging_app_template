@@ -14,7 +14,7 @@ RUN pip install --upgrade pip
 COPY Pipfile Pipfile
 COPY Pipfile.lock Pipfile.lock
 
-RUN pip3 install pipenv
+RUN pip3 install "pipenv==2018.11.26"
 RUN pipenv install --deploy --system
 
 COPY . /app/
