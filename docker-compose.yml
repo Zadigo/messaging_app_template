@@ -10,7 +10,7 @@ services:
             - 8000:8000
         volumes:
             - .:/app
-
+            
     enginx:
         build: ./docker/nginx
         container_name: "enginx"
@@ -27,3 +27,8 @@ services:
 
 volumes:
     redis_data: {}
+
+networks:
+    my_network:
+        name: "my_network_test"
+        # ipv4_address: 172.16.238.10 
