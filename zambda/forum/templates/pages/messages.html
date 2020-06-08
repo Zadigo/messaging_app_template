@@ -49,24 +49,28 @@
     <script>
         var csrf = $(".csrf input").val()
 
-        var protocol = window.location.protocol
-        var socketprotocol = "ws://"
-        if (protocol === "https:") {
-            socketprotocol = "wss://"
+        var createSocket = function(currentthread) {
+            var protocol = window.location.protocol
+            var socketprotocol = "ws://"
+            if (protocol === "https:") {
+                socketprotocol = "wss://"
+            }
+            const base = socketprotocol + window.location.host
+            const url = base + "/ws/forum/" + currentthread + "/"
+            const socket = new WebSocket(url)
+            
+            // socket.onopen = function(e) {console.log("OPEN")}
+            // socket.onmessage = function(e) {
+            //     console.log(e.data)
+            //     // self.$emit("sendsocketmessage", e.data)
+            // }
+            // socket.onclose = function(e) {
+            //     self.$data.newmessage = "" 
+            //     console.log("CLOSE")
+            // }
+            return socket
         }
-        const base = socketprotocol + window.location.host
-        const url = base + "/ws/forum/" + self.$props.currentthread + "/"
-        const socket = new WebSocket(url)
 
-        // socket.onopen = function(e) {console.log("OPEN")}
-        // socket.onmessage = function(e) {
-        //     console.log(e.data)
-        //     // self.$emit("sendsocketmessage", e.data)
-        // }
-        // socket.onclose = function(e) {
-        //     self.$data.newmessage = "" 
-        //     console.log("CLOSE")
-        // }
 
         var actionbuttons = {
             props: ["currentthread"],
@@ -126,6 +130,7 @@
             methods: {
                 sendsocketmessage: function() {
                     var self = this
+                    var socket = createSocket(self.$props.currentthread)
                     socket.send(self.$data.newmessage)
                 },
                 createnewmessage: function() {
