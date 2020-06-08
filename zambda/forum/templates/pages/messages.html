@@ -33,7 +33,7 @@
             </div>
             <div class="row">
                 <div class="col s12 m12 l12">
-                    <messagingbox @createnewmessage="showcreatedmessage" v-bind:currentthread="currentthread" v-bind:showmessagebox="showmessagebox" />
+                    <messagingbox @sendsocketmessage="showcreatedmessage" @createnewmessage="showcreatedmessage" v-bind:currentthread="currentthread" v-bind:showmessagebox="showmessagebox" />
                 </div>
             </div>
         </section>
@@ -117,6 +117,10 @@
                     const socket = new WebSocket(url)
 
                     socket.onopen = function(e) {console.log("OPEN")}
+                    socket.onmessage = function(e) {
+                        console.log(e.data)
+                        // self.$emit("sendsocketmessage", e.data)
+                    }
                     socket.onclose = function(e) {
                         self.$data.newmessage = "" 
                         console.log("CLOSE")
@@ -134,7 +138,7 @@
                     xhr.responseType = "json"
                     xhr.onloadend = function() {
                         self.$data.newmessage = ""
-                        self.$emit("createnewmessage", xhr.response)      
+                        self.$emit("createnewmessage", xhr.response)
                     }
                     xhr.open("POST", "/forum/thread/" + this.$props.currentthread + "/new-message")
                     xhr.send(formdata)
