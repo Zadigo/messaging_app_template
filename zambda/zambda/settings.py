@@ -67,7 +67,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],
+            'hosts': [('redis', 6379)],
         },
     },
 }
@@ -126,4 +126,4 @@ STATIC_ROOT = 'static'
 
 MEDIA_URL = '/media/'
 
-MEDIA_ROOT = None
+MEDIA_ROOT = 'media'
