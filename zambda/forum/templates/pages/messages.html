@@ -107,8 +107,12 @@
             methods: {
                 sendsocketmessage: function() {
                     var self = this
-                    
-                    const base = "ws://" + window.location.host
+                    var protocol = window.location.protocol
+                    var socketprotocol = "ws://"
+                    if (protocol === "https:") {
+                        socketprotocol = "wss://"
+                    }
+                    const base = socketprotocol + window.location.host
                     const url = base + "/ws/forum/" + self.$props.currentthread + "/"
                     const socket = new WebSocket(url)
 
