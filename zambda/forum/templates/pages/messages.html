@@ -47,6 +47,27 @@
     {{ forum_messages|json_script:"forum_messages" }}
 
     <script>
+        var protocol = window.location.protocol
+        var socketprotocol = "ws://"
+        if (protocol === "https:") {
+            socketprotocol = "wss://"
+        }
+        const base = socketprotocol + window.location.host
+        const url = base + "/ws/forum/" + self.$props.currentthread + "/"
+        const socket = new WebSocket(url)
+
+        // socket.onopen = function(e) {console.log("OPEN")}
+        // socket.onmessage = function(e) {
+        //     console.log(e.data)
+        //     // self.$emit("sendsocketmessage", e.data)
+        // }
+        // socket.onclose = function(e) {
+        //     self.$data.newmessage = "" 
+        //     console.log("CLOSE")
+        // }
+    </script>
+
+    <script>
         var csrf = $(".csrf input").val()
 
         var actionbuttons = {
@@ -107,26 +128,7 @@
             methods: {
                 sendsocketmessage: function() {
                     var self = this
-                    var protocol = window.location.protocol
-                    var socketprotocol = "ws://"
-                    if (protocol === "https:") {
-                        socketprotocol = "wss://"
-                    }
-                    const base = socketprotocol + window.location.host
-                    const url = base + "/ws/forum/" + self.$props.currentthread + "/"
-                    const socket = new WebSocket(url)
-
-                    socket.onopen = function(e) {console.log("OPEN")}
-                    socket.onmessage = function(e) {
-                        console.log(e.data)
-                        // self.$emit("sendsocketmessage", e.data)
-                    }
-                    socket.onclose = function(e) {
-                        self.$data.newmessage = "" 
-                        console.log("CLOSE")
-                    }
-
-                    socket.send("Hello!")
+                    socket.send(self.$data.newmessage)
                 },
                 createnewmessage: function() {
                     var self = this
