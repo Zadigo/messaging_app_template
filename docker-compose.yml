@@ -5,7 +5,7 @@ services:
         build: ./zambda
         container_name: "messaging_app"
         ports:
-            - "40:80"
+            - 8000:8000
         volumes:
             - .:/app
 
@@ -13,7 +13,7 @@ services:
         build: ./docker/nginx
         container_name: "enginx"
         ports:
-            - "50:80"
+            - 4000:8000
 
     redis:
         build: ./docker/redis
