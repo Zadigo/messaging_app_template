@@ -37,4 +37,5 @@ volumes:
 networks:
     my_network:
         name: "my_network_test"
+        driver: bridge
         # ipv4_address: 172.16.238.10 
