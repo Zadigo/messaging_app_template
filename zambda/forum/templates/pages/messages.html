@@ -47,6 +47,8 @@
     {{ forum_messages|json_script:"forum_messages" }}
 
     <script>
+        var csrf = $(".csrf input").val()
+
         var protocol = window.location.protocol
         var socketprotocol = "ws://"
         if (protocol === "https:") {
@@ -65,10 +67,6 @@
         //     self.$data.newmessage = "" 
         //     console.log("CLOSE")
         // }
-    </script>
-
-    <script>
-        var csrf = $(".csrf input").val()
 
         var actionbuttons = {
             props: ["currentthread"],
