@@ -60,9 +60,15 @@
             socketprotocol = "wss://"
         }
 
-        // VUE
-        // Vue
+        var mixins = {
+            data() {
+                return {
+                    kendall: true
+                }
+            }
+        }
 
+        // VUE
         var actionbuttons = {
             props: ["currentthread"],
             delimiters: ["[[", "]]"],
@@ -221,6 +227,7 @@
             el: "#messages_app",
             components: {maininterface, messagebox, actionbuttons},
             delimiters: ["[[", "]]"],
+            mixins: [mixins],
             data() {
                 return {
                     threads: [],
