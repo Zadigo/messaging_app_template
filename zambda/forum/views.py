@@ -64,7 +64,8 @@ class ForumView(View):
         if method == 'createthread':
             user = request.user
             thread = models.MessagesThread.objects.create(reference=utilities.create_thread_reference(), from_user=user)
-            return django_http.JsonResponse(data={'thread': thread})
+            serialized_thread = serializers.ThreadSerializer(instance=thread)
+            return django_http.JsonResponse(data=serialized_thread.data)
 
 @http.require_http_methods(['POST'])
 def new_message(request, **kwargs):

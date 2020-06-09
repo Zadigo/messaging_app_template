@@ -35,8 +35,9 @@
             </div>
             <div class="row">
                 <div class="col s12 m12 l12">
-                    <messagingbox @sendsocketmessage="showcreatedmessage" @createnewmessage="showcreatedmessage" 
-                        v-bind:socket="socket" v-bind:currentthread="currentthread" v-bind:showmessagebox="showmessagebox" />
+                    <messagebox @sendemailmessage="showemailmessage" 
+                        v-bind:socket="socket" v-bind:currentthread="currentthread" 
+                                                v-bind:showmessagebox="showmessagebox" />
                 </div>
             </div>
         </section>
@@ -51,6 +52,16 @@
 
     <script>
         var csrf = $(".csrf input").val()
+
+        // PROTOCOL
+        const protocol = window.location.protocol
+        const socketprotocol = "ws://"
+        if (protocol === "https:") {
+            socketprotocol = "wss://"
+        }
+
+        // VUE
+        // Vue
 
         var actionbuttons = {
             props: ["currentthread"],
@@ -85,15 +96,15 @@
             }
         }
 
-        var messagingbox = {
+        var messagebox = {
             props: ["currentthread", "showmessagebox", "socket"],
             template: "\
             <transition name='reported_thread'>\
                 <div v-if='!threadreported' class='row'>\
                     <div class='col s12 m12 l12'>\
                         <textarea v-model='newmessage' name='message' id='message-textbox' cols='30' rows='100'></textarea>\
-                        <button @click='createnewmessage' class='btn-large'>New message</button>\
-                        <button @click='sendsocketmessage' class='btn-large red'>New message</button>\
+                        <button @click='sendemailmessage' class='btn-large'>New message</button>\
+                        <button @click='sendchatmessage' class='btn-large red'>Chat message</button>\
                     </div>\
                 </div>\
                 <div v-else class='thread-reported'>\
@@ -105,20 +116,21 @@
                 return {
                     threadreported: false,
                     newmessage: "",
-
-                    // socket: null
                 }
             },
             beforeDestroy() {
                 this.$props.socket.close()
             },
             methods: {
-                sendsocketmessage: function() {
+                sendchatmessage: function() {
+                    // Send using the live chat
                     var self = this
                     self.$props.socket.send(self.$data.newmessage)
                     self.$data.newmessage = ""
                 },
-                createnewmessage: function() {
+                sendemailmessage: function() {
+                    // Sends a message that appears in the
+                    // live chat but it is not in live time
                     var self = this
                     var formdata = new FormData()
                     formdata.append("csrfmiddlewaretoken", csrf)
@@ -128,7 +140,7 @@
                     xhr.responseType = "json"
                     xhr.onloadend = function() {
                         self.$data.newmessage = ""
-                        self.$emit("createnewmessage", xhr.response)
+                        self.$emit("sendemailmessage", xhr.response)
                     }
                     xhr.open("POST", "/forum/thread/" + this.$props.currentthread + "/new-message")
                     xhr.send(formdata)
@@ -146,7 +158,7 @@
                     <div @click='createthread' class='thread'>Create thread</div>\
                 </div>\
                 <div class='messages-window'>\
-                    <div v-for='message in nondeletedmessages' :key='message.id' class='message' :class='isusermessage(message.thread_reference)'>\
+                    <div v-for='message in nondeletedmessages' :key='message.id' class='message'>\
                         <div class='text'>\
                             [[ message.message ]]\
                         </div>\
@@ -163,14 +175,6 @@
                 }
             },
             methods: {
-                isusermessage: function(thread) {
-                    var user = "{{ request.user.id }}"
-                    if (user === (thread.from_user * 1)) {
-                        return "red lighten-4"
-                    } else {
-                        return "grey lighten-4"
-                    }
-                },
                 selectthread: function(thread) {
                     this.$emit("selectthread", thread)
                 },
@@ -185,7 +189,9 @@
                     xhr.onloadend = function() {
                         if (xhr.status === 400) {
                             window.location.reload()
-                        } else {
+                        } 
+                        
+                        if (xhr.status === 200) {
                             message.deleted = true
                         }
                     }
@@ -200,7 +206,11 @@
 
                     var xhr = new XMLHttpRequest()
                     xhr.responseType = "json"
-                    xhr.onloadend = function() {window.location.reload()}
+                    xhr.onloadend = function() {
+                        if (xhr.status === 200) {
+                            window.location.reload()
+                        }
+                    }
                     xhr.open("POST", window.location.href)
                     xhr.send(formdata)
                 }
@@ -209,7 +219,7 @@
 
         var messagesapp = new Vue({
             el: "#messages_app",
-            components: {maininterface, messagingbox, actionbuttons},
+            components: {maininterface, messagebox, actionbuttons},
             delimiters: ["[[", "]]"],
             data() {
                 return {
@@ -245,14 +255,8 @@
 
                 this.$data.currentthread = "{{ first_thread_reference }}"
 
-                // SOCKET
-                var self = this
-                var protocol = window.location.protocol
-                var socketprotocol = "ws://"
-                if (protocol === "https:") {
-                    socketprotocol = "wss://"
-                }
-
+                // We open a new socket for users to be able
+                // to communicate with one another
                 const base = socketprotocol + window.location.host
                 const url = base + "/ws/forum/" + this.$data.currentthread + "/"
                 const socket = new WebSocket(url)
@@ -270,7 +274,7 @@
                 self.$data.socket = socket
             },
             methods: {
-                showcreatedmessage: function(message) {
+                showemailmessage: function(message) {
                     message["deleted"] = false
                     this.$data.messages.push(message)
                 },
@@ -302,11 +306,6 @@
                     // and open a new with the thread that
                     // was clicked by the user
                     self.$data.socket.close()
-                    var protocol = window.location.protocol
-                    var socketprotocol = "ws://"
-                    if (protocol === "https:") {
-                        socketprotocol = "wss://"
-                    }
 
                     const base = socketprotocol + window.location.host
                     const url = base + "/ws/forum/" + this.$data.currentthread + "/"
