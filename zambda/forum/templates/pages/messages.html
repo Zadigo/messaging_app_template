@@ -28,12 +28,15 @@
             </div>
             <div class="row">
                 <div class="col s12 m12 l12">
-                    <maininterface @selectthread="viewthread" v-bind:messages="messages" v-bind:threads="threads" v-bind:currentthread="currentthread" />
+                    <maininterface @selectthread="viewthread" 
+                        v-bind:messages="messages" v-bind:threads="threads" 
+                                        v-bind:currentthread="currentthread" />
                 </div>
             </div>
             <div class="row">
                 <div class="col s12 m12 l12">
-                    <messagingbox @sendsocketmessage="showcreatedmessage" @createnewmessage="showcreatedmessage" v-bind:currentthread="currentthread" v-bind:showmessagebox="showmessagebox" />
+                    <messagingbox @sendsocketmessage="showcreatedmessage" @createnewmessage="showcreatedmessage" 
+                        v-bind:socket="socket" v-bind:currentthread="currentthread" v-bind:showmessagebox="showmessagebox" />
                 </div>
             </div>
         </section>
@@ -83,7 +86,7 @@
         }
 
         var messagingbox = {
-            props: ["currentthread", "showmessagebox"],
+            props: ["currentthread", "showmessagebox", "socket"],
             template: "\
             <transition name='reported_thread'>\
                 <div v-if='!threadreported' class='row'>\
@@ -103,37 +106,16 @@
                     threadreported: false,
                     newmessage: "",
 
-                    socket: null
+                    // socket: null
                 }
             },
-            created() {
-                var self = this
-                var protocol = window.location.protocol
-                var socketprotocol = "ws://"
-                if (protocol === "https:") {
-                    socketprotocol = "wss://"
-                }
-
-                const base = socketprotocol + window.location.host
-                // const url = base + "/ws/forum/" + this.$props.currentthread + "/"
-                const url = base + "/ws/forum/{{ first_thread_reference }}/"
-                const socket = new WebSocket(url)
-
-                socket.onopen = (e) => {
-                    console.log("CONNECTED...")
-                }
-
-                socket.onmessage = (e) => {
-                    var message = JSON.parse(e.data)["message"]
-                    self.$emit("sendsocketmessage", message)
-                }
-
-                self.$data.socket = socket
+            beforeDestroy() {
+                this.$props.socket.close()
             },
             methods: {
                 sendsocketmessage: function() {
                     var self = this
-                    self.$data.socket.send(self.$data.newmessage)
+                    self.$props.socket.send(self.$data.newmessage)
                     self.$data.newmessage = ""
                 },
                 createnewmessage: function() {
@@ -237,7 +219,9 @@
                     showmessagebox: true,
 
                     threadisactive: true,
-                    threadisreported: false
+                    threadisreported: false,
+
+                    socket: null
                 }
             },
             computed: {
@@ -247,7 +231,7 @@
                     })
                 }
             },
-            mounted() {
+            created() {
                 var self = this
                 var messages = JSON.parse($("#forum_messages").text())
                 var threads = JSON.parse($("#threads").text())
@@ -260,6 +244,30 @@
                 this.$data.messages = messages
 
                 this.$data.currentthread = "{{ first_thread_reference }}"
+
+                // SOCKET
+                var self = this
+                var protocol = window.location.protocol
+                var socketprotocol = "ws://"
+                if (protocol === "https:") {
+                    socketprotocol = "wss://"
+                }
+
+                const base = socketprotocol + window.location.host
+                const url = base + "/ws/forum/" + this.$data.currentthread + "/"
+                const socket = new WebSocket(url)
+
+                socket.onopen = (e) => {
+                    console.log("CONNECTED...")
+                }
+
+                socket.onmessage = (e) => {
+                    var message = JSON.parse(e.data)["message"]
+                    message["deleted"] = false
+                    this.$data.messages.push(message)
+                }
+
+                self.$data.socket = socket
             },
             methods: {
                 showcreatedmessage: function(message) {
@@ -268,27 +276,53 @@
                 },
                 viewthread: function(thread) {
                     var self = this
-                    var formdata = new FormData()
-                    formdata.append("csrfmiddlewaretoken", csrf)
-                    formdata.append("method", "viewthread")
-                    formdata.append("reference", thread.reference)
+                    // var formdata = new FormData()
+                    // formdata.append("csrfmiddlewaretoken", csrf)
+                    // formdata.append("method", "viewthread")
+                    // formdata.append("reference", thread.reference)
 
-                    var xhr = new XMLHttpRequest()
-                    xhr.responseType = "json"
+                    // var xhr = new XMLHttpRequest()
+                    // xhr.responseType = "json"
 
-                    xhr.onloadend = function() {
-                        var forummessages = xhr.response.messages
-                        _.forEach(forummessages, (message) => {
-                            message["deleted"] = false
-                        })
-                        self.$data.messages = forummessages
+                    // xhr.onloadend = function() {
+                    //     var forummessages = xhr.response.messages
+                    //     _.forEach(forummessages, (message) => {
+                    //         message["deleted"] = false
+                    //     })
+                    //     self.$data.messages = forummessages
 
-                        self.$data.currentthread = xhr.response.current_thread
+                    //     self.$data.currentthread = xhr.response.current_thread
 
-                        self.$data.threadisreported = xhr.response.is_reported
+                    //     self.$data.threadisreported = xhr.response.is_reported
+                    // }
+                    // xhr.open("POST", window.location.href)
+                    // xhr.send(formdata)
+
+                    // We have to close the previous socket
+                    // and open a new with the thread that
+                    // was clicked by the user
+                    self.$data.socket.close()
+                    var protocol = window.location.protocol
+                    var socketprotocol = "ws://"
+                    if (protocol === "https:") {
+                        socketprotocol = "wss://"
                     }
-                    xhr.open("POST", window.location.href)
-                    xhr.send(formdata)
+
+                    const base = socketprotocol + window.location.host
+                    const url = base + "/ws/forum/" + this.$data.currentthread + "/"
+                    const socket = new WebSocket(url)
+
+                    socket.onopen = (e) => {
+                        console.log("CONNECTED...")
+                    }
+
+                    socket.onmessage = (e) => {
+                        var message = JSON.parse(e.data)["message"]
+                        message["deleted"] = false
+                        this.$data.messages.push(message)
+                    }
+
+                    self.$data.socket = socket
                 }
             }
         })
