@@ -27,10 +27,19 @@ class ChatConsumer(websocket.JsonWebsocketConsumer):
 
     def receive(self, text_data):
         print(text_data)
-
-        message = 'Hi this is my first message on the forum'
+        message = {
+            "created_on": "2020-05-31",
+            "id": 89,
+            "message": text_data,
+            "thread_reference": {
+                "from_user": 1,
+                "reference": "388f12d950",
+                "reported": "False",
+                "to_user": 2
+            }
+        }
         
-        #Send message to thread
+        # Send message to thread
         async_to_sync(self.channel_layer.group_send)(
             self.thread_name,
             {
@@ -38,12 +47,10 @@ class ChatConsumer(websocket.JsonWebsocketConsumer):
                 'message': message
             }
         )
-
-        self.send(text_data="We are a connected")
-        self.close(code=1000)
+        
+        # self.close(code=1000)
 
     def chat_message(self, event):
-        print(event)
         message = event['message']
 
         # Send message to WebSocket

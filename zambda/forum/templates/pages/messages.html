@@ -49,29 +49,6 @@
     <script>
         var csrf = $(".csrf input").val()
 
-        var createSocket = function(currentthread) {
-            var protocol = window.location.protocol
-            var socketprotocol = "ws://"
-            if (protocol === "https:") {
-                socketprotocol = "wss://"
-            }
-            const base = socketprotocol + window.location.host
-            const url = base + "/ws/forum/" + currentthread + "/"
-            const socket = new WebSocket(url)
-            
-            // socket.onopen = function(e) {console.log("OPEN")}
-            // socket.onmessage = function(e) {
-            //     console.log(e.data)
-            //     // self.$emit("sendsocketmessage", e.data)
-            // }
-            // socket.onclose = function(e) {
-            //     self.$data.newmessage = "" 
-            //     console.log("CLOSE")
-            // }
-            return socket
-        }
-
-
         var actionbuttons = {
             props: ["currentthread"],
             delimiters: ["[[", "]]"],
@@ -124,14 +101,40 @@
             data() {
                 return {
                     threadreported: false,
-                    newmessage: ""
+                    newmessage: "",
+
+                    socket: null
                 }
+            },
+            created() {
+                var self = this
+                var protocol = window.location.protocol
+                var socketprotocol = "ws://"
+                if (protocol === "https:") {
+                    socketprotocol = "wss://"
+                }
+
+                const base = socketprotocol + window.location.host
+                // const url = base + "/ws/forum/" + this.$props.currentthread + "/"
+                const url = base + "/ws/forum/{{ first_thread_reference }}/"
+                const socket = new WebSocket(url)
+
+                socket.onopen = (e) => {
+                    console.log("CONNECTED...")
+                }
+
+                socket.onmessage = (e) => {
+                    var message = JSON.parse(e.data)["message"]
+                    self.$emit("sendsocketmessage", message)
+                }
+
+                self.$data.socket = socket
             },
             methods: {
                 sendsocketmessage: function() {
                     var self = this
-                    var socket = createSocket(self.$props.currentthread)
-                    socket.send(self.$data.newmessage)
+                    self.$data.socket.send(self.$data.newmessage)
+                    self.$data.newmessage = ""
                 },
                 createnewmessage: function() {
                     var self = this
@@ -148,7 +151,6 @@
                     xhr.open("POST", "/forum/thread/" + this.$props.currentthread + "/new-message")
                     xhr.send(formdata)
                 },
-
             }
         }
 
@@ -249,6 +251,7 @@
                 var self = this
                 var messages = JSON.parse($("#forum_messages").text())
                 var threads = JSON.parse($("#threads").text())
+
                 this.$data.threads = threads
 
                 _.forEach(messages, (message) => {
