@@ -1,4 +1,5 @@
 import os
+# from celery.schedules import crontab
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,8 +26,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions',
     'channels',
     'forum',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -128,3 +131,35 @@ STATIC_ROOT = 'static'
 MEDIA_URL = '/media/'
 
 MEDIA_ROOT = 'media'
+
+
+# # CELERY
+
+# CELERY_BROKER_URL = os.environ.get('CELERY_BROKER', 'redis://redis:6379/0')
+
+# CELERY_RESULT_BACKEND = os.environ.get('CELERY_BROKER', 'redis://redis:6379/0')
+
+
+# # CELERY BEAT
+
+# CELERY_BEAT_SCHEDULE = {
+#     'send_email': {
+#         'task': 'zambda.celery.custom_task',
+#         'schedule': crontab(minute="*/1"),
+#     }
+# }
+
+
+# EMAIL
+
+EMAIL_HOST = 'smtp.gmail.com'
+
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+
+EMAIL_USE_TLS = True
+
+EMAIL_PORT = 587
+
+EMAIL_USE_LOCALTIME = True

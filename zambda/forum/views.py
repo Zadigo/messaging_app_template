@@ -1,14 +1,16 @@
 import ast
 
+import celery
 from django import http as django_http
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.views import generic
 from django.views.decorators import http
 from django.views.decorators.csrf import csrf_exempt
 
-from forum import models, serializers, utilities
+from forum import models, serializers, tasks, utilities
 
 MYUSER = get_user_model()
 
@@ -24,6 +26,9 @@ class UsersView(generic.ListView):
 
 
 class ForumView(generic.View):
+    """
+    Main entrypoint to access the forum
+    """
     def get(self, request, *args, **kwargs):
         threads = models.Thread.custom_manager.mythreads(request)
         context = {
@@ -41,13 +46,9 @@ class ForumView(generic.View):
             serialized_threads = serializers.ThreadSerializer(instance=threads, many=True)
             serialized_messages = serializers.MessageSerializer(instance=messages, many=True)
 
-        else:
-            pass
-
-            #         'vue_threads': serialized_threads.data,
-            # 'vue_messages': serialized_messages.data,
-            # 'first_thread_reference': first_thread,
-
+            context.update({'vue_threads': serialized_threads.data})
+            context.update({'vue_messages': serialized_messages.data})
+            context.update({'first_thread_reference': first_thread.reference})
 
         return render(request, 'pages/messages.html', context=context) 
 
@@ -76,6 +77,13 @@ def new_message(request, **kwargs):
     serialized_message = serializers.MessageSerializer(new_message)
     return django_http.JsonResponse(data=serialized_message.data)
 
+
+@csrf_exempt
+@http.require_POST
+def new_email_message(request):
+    method = request.POST.get('email')
+    message = request.POST.get('message')
+    tasks.delayed_send_email.delay(10)
 
 @csrf_exempt
 @http.require_POST

@@ -11,6 +11,10 @@ channels-redis = "*"
 django = "*"
 django-rest-framework = "*"
 daphne = "*"
+celery = "*"
+redis = "*"
+django-celery-beat = "*"
+django-extensions = "*"
 
 [requires]
 python_version = "3.8"

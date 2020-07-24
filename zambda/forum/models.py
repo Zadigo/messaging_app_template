@@ -55,8 +55,10 @@ class Message(AbstractMessage):
     message        = models.TextField(blank=True, null=True)
     created_on      = models.DateField(auto_now_add=True)
 
+    email       = models.BooleanField(default=False)
+
     objects = models.Manager()
-    custom_manager = mangers.MessagesManager().as_manager()
+    custom_manager = managers.MessagesManager().as_manager()
 
     def __str__(self):
         return self.thread.reference
