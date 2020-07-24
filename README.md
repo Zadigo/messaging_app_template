@@ -36,8 +36,10 @@ The Pipfile comes with the following applications:
 
 Once you've cloned the repository or downloaded the zip file, start your project normally with `./manager.py/runserver` after having run `./manage.py migrate`.
 
-You will need to run the redis server if you want to benefit from the full live chat functionnalities. For that, click on `redis-server` from the `redis/3.0.5` folder this will start the terminal with the server.
+## Redis
 
-The template also comes with celery and celery beat in order to create tasks or periodic tasks. For a local utilisation, run `celery worker -A zambda -l info` to start the main process and `celery beat -A zambda -l info` for the scheduler.
+You will need to run a redis server locally if you want to benefit from the full live chat functionnalities when developing your application. If you are on Windows, please download the Redis files from the following github account [cuiwenyuan/Redis-Windows-32bit](https://github.com/cuiwenyuan/Redis-Windows-32bit) and then click on the `redis-server.exe` to run it.
 
-You can add custom tasks either in the `zambda/celery.py` file or in the `forum/tasks.py`.
+## Celery
+
+The template also comes with celery and celery beat in order to create tasks or periodic tasks. For a local development, after running Redis, do `celery worker -A zambda -l info` to start the main process and `celery beat -A zambda -l info` for the scheduler.
