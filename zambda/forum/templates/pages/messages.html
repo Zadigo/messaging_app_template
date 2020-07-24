@@ -1,46 +1,41 @@
 {% extends "base.html" %}
-{% load static %}
+{% load i18n static %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'messages.css' %}">
-    <style>
-        .reported_thread-leave-active {
-            transition: all .3s ease-out;
-        }
-        .reported_thread-leave {
-            opacity: 1;
-        }
-        .reported_thread-leave-to {
-            opacity: 0;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'transitions.css' %}">
 {% endblock %}
 
 {% block body %}
 <h3>{{ user.get_full_name }}</h3>
 <section class="section">
-    <div id="messages_app">
+    <div id="vue_messages_app">
         <section class="section forum">
             <div class="row">
                 <div class="col s12 m12 l12">
-                    <actionbuttons v-bind:currentthread="currentthread" />
+                    <action-buttons v-bind:currentthread="currentthread" />
                 </div>
             </div>
+
             <div class="row">
                 <div class="col s12 m12 l12">
-                    <maininterface @selectthread="viewthread" 
-                        v-bind:messages="messages" v-bind:threads="threads" 
-                                        v-bind:currentthread="currentthread" />
+                    <messagesinterface 
+                        @selectthread="viewthread" 
+                        v-bind:messages="messages" 
+                        v-bind:threads="threads" 
+                        v-bind:currentthread="currentthread" 
+                        v-bind:socket="socket"
+                    />
                 </div>
-            </div>
-            <div class="row">
-                <div class="col s12 m12 l12">
-                    <messagebox @sendemailmessage="showemailmessage" 
-                        v-bind:socket="socket" v-bind:currentthread="currentthread" 
-                                                v-bind:showmessagebox="showmessagebox" />
-                </div>
-            </div>
+            </div>                
+
+            <!-- EDITOR -->
+            {% include "components/editor.html" %}
         </section>
+
+        <!-- MODAL -->
+        {% include "components/modals/choose_user.html" %}
+
         <div class="csrf">{% csrf_token %}</div>
     </div>
 </section>
@@ -49,288 +44,9 @@
 {% block vuejs_scripts %}
     {{ threads|json_script:"threads" }}
     {{ forum_messages|json_script:"forum_messages" }}
-
-    <script>
-        var csrf = $(".csrf input").val()
-
-        // PROTOCOL
-        const protocol = window.location.protocol
-        const socketprotocol = "ws://"
-        if (protocol === "https:") {
-            socketprotocol = "wss://"
-        }
-
-        var mixins = {
-            data() {
-                return {
-                    kendall: true
-                }
-            }
-        }
-
-        // VUE
-        var actionbuttons = {
-            props: ["currentthread"],
-            delimiters: ["[[", "]]"],
-            template: "\
-                <div class='btn-group'>\
-                    <div @click='refreshpage' class='btn white black-text'><i class='material-icons'>refresh</i></div>\
-                    <div @click='reportthread' class='btn white black-text'>\
-                        <i class='material-icons left'>block</i>\
-                            [[ currentthread ]]\
-                    </div>\
-                </div>\
-            ",
-            methods: {
-                refreshpage: function() {
-                    window.location.reload()
-                },
-                reportthread: function() {
-                    var self = this
-                    var self = this
-                    var formdata = new FormData()
-                    formdata.append("csrfmiddlewaretoken", csrf)
-
-                    var xhr = new XMLHttpRequest()
-                    xhr.responseType = "json"
-                    xhr.onloadend = function() {
-                        window.location.reload()
-                    }
-                    xhr.open("POST", "/forum/thread/" + this.$props.currentthread + "/report")
-                    xhr.send(formdata)
-                }
-            }
-        }
-
-        var messagebox = {
-            props: ["currentthread", "showmessagebox", "socket"],
-            template: "\
-            <transition name='reported_thread'>\
-                <div v-if='!threadreported' class='row'>\
-                    <div class='col s12 m12 l12'>\
-                        <textarea v-model='newmessage' name='message' id='message-textbox' cols='30' rows='100'></textarea>\
-                        <button @click='sendemailmessage' class='btn-large'>New message</button>\
-                        <button @click='sendchatmessage' class='btn-large red'>Chat message</button>\
-                    </div>\
-                </div>\
-                <div v-else class='thread-reported'>\
-                    The thread has been blocked. No messages cannot be posted until admin verficiation.\
-                </div>\
-            </transition>\
-            ",
-            data() {
-                return {
-                    threadreported: false,
-                    newmessage: "",
-                }
-            },
-            beforeDestroy() {
-                this.$props.socket.close()
-            },
-            methods: {
-                sendchatmessage: function() {
-                    // Send using the live chat
-                    var self = this
-                    self.$props.socket.send(self.$data.newmessage)
-                    self.$data.newmessage = ""
-                },
-                sendemailmessage: function() {
-                    // Sends a message that appears in the
-                    // live chat but it is not in live time
-                    var self = this
-                    var formdata = new FormData()
-                    formdata.append("csrfmiddlewaretoken", csrf)
-                    formdata.append("message", this.$data.newmessage)
-
-                    var xhr = new XMLHttpRequest()
-                    xhr.responseType = "json"
-                    xhr.onloadend = function() {
-                        self.$data.newmessage = ""
-                        self.$emit("sendemailmessage", xhr.response)
-                    }
-                    xhr.open("POST", "/forum/thread/" + this.$props.currentthread + "/new-message")
-                    xhr.send(formdata)
-                },
-            }
-        }
-
-        var maininterface = {
-            props: ["threads", "currentthread", "messages"],
-            delimiters: ["[[", "]]"],
-            template: "\
-            <div class='windows'>\
-                <div class='threads-window'>\
-                    <div @click='selectthread(thread)' v-for='thread in threads' :key='thread.reference' class='thread' :class='{\"red\": thread.reported}'>[[ thread.reference ]]</div>\
-                    <div @click='createthread' class='thread'>Create thread</div>\
-                </div>\
-                <div class='messages-window'>\
-                    <div v-for='message in nondeletedmessages' :key='message.id' class='message'>\
-                        <div class='text'>\
-                            [[ message.message ]]\
-                        </div>\
-                        <i @click='deletemessage(message)' class='material-icons'>delete</i>\
-                    </div>\
-                </div>\
-            </div>\
-            ",
-            computed: {
-                nondeletedmessages() {
-                    return _.filter(this.$props.messages, (message) => {
-                        return message.deleted === false
-                    })
-                }
-            },
-            methods: {
-                selectthread: function(thread) {
-                    this.$emit("selectthread", thread)
-                },
-                deletemessage: function(message) {
-                    var self = this
-                    var formdata = new FormData()
-                    formdata.append("csrfmiddlewaretoken", csrf)
-                    formdata.append("messageid", message.id)
-
-                    var xhr = new XMLHttpRequest()
-                    xhr.responseType = "json"
-                    xhr.onloadend = function() {
-                        if (xhr.status === 400) {
-                            window.location.reload()
-                        } 
-                        
-                        if (xhr.status === 200) {
-                            message.deleted = true
-                        }
-                    }
-                    xhr.open("POST", "/forum/thread/" + this.$props.currentthread + "/delete-message")
-                    xhr.send(formdata)
-                },
-                createthread: function(message) {
-                    var self = this
-                    var formdata = new FormData()
-                    formdata.append("csrfmiddlewaretoken", csrf)
-                    formdata.append("method", "createthread")
-
-                    var xhr = new XMLHttpRequest()
-                    xhr.responseType = "json"
-                    xhr.onloadend = function() {
-                        if (xhr.status === 200) {
-                            window.location.reload()
-                        }
-                    }
-                    xhr.open("POST", window.location.href)
-                    xhr.send(formdata)
-                }
-            }
-        }
-
-        var messagesapp = new Vue({
-            el: "#messages_app",
-            components: {maininterface, messagebox, actionbuttons},
-            delimiters: ["[[", "]]"],
-            mixins: [mixins],
-            data() {
-                return {
-                    threads: [],
-                    messages: [],
-                    currentthread: "",
-                    showmessagebox: true,
-
-                    threadisactive: true,
-                    threadisreported: false,
-
-                    socket: null
-                }
-            },
-            computed: {
-                messagelist() {
-                    return this.$data.messages.filter(message => {
-                        return message.mark_as_delete === false
-                    })
-                }
-            },
-            created() {
-                var self = this
-                var messages = JSON.parse($("#forum_messages").text())
-                var threads = JSON.parse($("#threads").text())
-
-                this.$data.threads = threads
-
-                _.forEach(messages, (message) => {
-                    message["deleted"] = false
-                })
-                this.$data.messages = messages
-
-                this.$data.currentthread = "{{ first_thread_reference }}"
-
-                // We open a new socket for users to be able
-                // to communicate with one another
-                const base = socketprotocol + window.location.host
-                const url = base + "/ws/forum/" + this.$data.currentthread + "/"
-                const socket = new WebSocket(url)
-
-                socket.onopen = (e) => {
-                    console.log("CONNECTED...")
-                }
-
-                socket.onmessage = (e) => {
-                    var message = JSON.parse(e.data)["message"]
-                    message["deleted"] = false
-                    this.$data.messages.push(message)
-                }
-
-                self.$data.socket = socket
-            },
-            methods: {
-                showemailmessage: function(message) {
-                    message["deleted"] = false
-                    this.$data.messages.push(message)
-                },
-                viewthread: function(thread) {
-                    var self = this
-                    // var formdata = new FormData()
-                    // formdata.append("csrfmiddlewaretoken", csrf)
-                    // formdata.append("method", "viewthread")
-                    // formdata.append("reference", thread.reference)
-
-                    // var xhr = new XMLHttpRequest()
-                    // xhr.responseType = "json"
-
-                    // xhr.onloadend = function() {
-                    //     var forummessages = xhr.response.messages
-                    //     _.forEach(forummessages, (message) => {
-                    //         message["deleted"] = false
-                    //     })
-                    //     self.$data.messages = forummessages
-
-                    //     self.$data.currentthread = xhr.response.current_thread
-
-                    //     self.$data.threadisreported = xhr.response.is_reported
-                    // }
-                    // xhr.open("POST", window.location.href)
-                    // xhr.send(formdata)
-
-                    // We have to close the previous socket
-                    // and open a new with the thread that
-                    // was clicked by the user
-                    self.$data.socket.close()
-
-                    const base = socketprotocol + window.location.host
-                    const url = base + "/ws/forum/" + this.$data.currentthread + "/"
-                    const socket = new WebSocket(url)
-
-                    socket.onopen = (e) => {
-                        console.log("CONNECTED...")
-                    }
-
-                    socket.onmessage = (e) => {
-                        var message = JSON.parse(e.data)["message"]
-                        message["deleted"] = false
-                        this.$data.messages.push(message)
-                    }
-
-                    self.$data.socket = socket
-                }
-            }
-        })
-    </script>
+    <!-- GLOBAL -->
+    {% include "vue/global.html" %}
+    <!-- MESSAGE -->
+    {# {% include "vue/message.html" %} #}
+    {% include "vue/base.html" %}
 {% endblock %}

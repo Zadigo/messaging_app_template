@@ -1,0 +1,9 @@
+.reported_thread-leave-active {
+    transition: all .3s ease-out;
+}
+.reported_thread-leave {
+    opacity: 1;
+}
+.reported_thread-leave-to {
+    opacity: 0;
+}

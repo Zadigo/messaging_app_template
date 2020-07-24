@@ -1,0 +1,14 @@
+{% load i18n %}
+
+<div id="{% block modal_id %}{% endblock %}" class="modal">
+    <div class="modal-content">
+        <h4>{% block modal_title %}{% endblock %}</h4>
+        {% block modal_content %}{% endblock %}
+    </div>
+
+    {% comment %}
+    <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Agree</a>
+    </div>        
+    {% endcomment %}
+</div>

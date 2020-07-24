@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block body %}
+    {% for user in users %}
+        <div class="card-panel">
+            <h4>{{ user.username }}</h4>
+            <a href="{% url 'forum:private' request.user.username %}" class="btn red">
+                {% trans "Private message" %}
+            </a>
+        </div> 
+    {% endfor %}
+{% endblock %}

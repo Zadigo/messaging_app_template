@@ -1,0 +1,29 @@
+{% extends "components/modals/base.html" %}
+{% load i18n %}
+
+{% block modal_title %}
+    {% trans "Choose user" %}
+{% endblock %}
+
+{% block modal_id %}choose_user{% endblock %}
+
+{% block modal_content %}
+    <form action="{% url 'forum:new_thread' %}" method="post">
+        {% for user in users %}
+            <p>
+                <label>
+                    <input type="checkbox" id="user" name="users" value="{{ user.username }}">
+                    <span>
+                        <div class="card-panel">
+                            {{ user.username }}
+                        </div>
+                    </span>
+                </label>
+            </p>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-large waves-effect waves-light">
+            {% trans "Create thread" %}
+        </button>
+    </form>
+{% endblock %}

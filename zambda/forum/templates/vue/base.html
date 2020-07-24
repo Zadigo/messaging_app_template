@@ -1,0 +1,138 @@
+{% load i18n %}
+
+{{ vue_threads|json_script:"vue_threads" }}
+
+{{ vue_messages|json_script:"vue_messages" }}
+
+<!-- EDITOR -->
+{% include "vue/editor.html" %}
+<!-- MESSAGES/THREADS -->
+{% include "vue/messages.html" %}
+
+<script>
+        const protocol = window.location.protocol
+        const socketprotocol = "ws://"
+        if (protocol === "https:") { socketprotocol = "wss://" }
+
+        var forumapp = new Vue({
+            el: "#vue_messages_app",
+            components: { messagebox, messagesinterface },
+            delimiters: ["[[", "]]"],
+            name: "Forum",
+            data() {
+                return {
+                    threads: [],
+                    messages: [],
+                    currentthread: "",
+                    showmessagebox: true,
+
+                    threadisactive: true,
+                    threadisreported: false,
+
+                    socket: null
+                }
+            },
+            beforeCreate() {
+            },
+            created() {
+                var self = this
+                var threads = JSON.parse($("#vue_threads").text())
+                var messages = JSON.parse($("#vue_messages").text())
+    
+                this.$data.threads = threads
+    
+                _.forEach(messages, (message) => {
+                    message["deleted"] = false
+                })
+                this.$data.messages = messages
+                this.$data.currentthread = "{{ first_thread_reference }}"
+
+                const base = socketprotocol + window.location.host
+                const url = base + "/ws/forum/" + this.$data.currentthread + "/"
+                const socket = new WebSocket(url)
+
+                console.log(socket)
+
+                socket.onopen = (e) => {
+                    console.log("CONNECTED...")
+                }
+
+                socket.onmessage = (e) => {
+                    var method = JSON.parse(e.data)["method"]
+                    var message = JSON.parse(e.data)["message"]
+
+                    // console.log(method)
+                    // console.log(message)
+
+                    if (method === "deleted") {
+                        var messagetohide = _.filter(this.$data.messages, (msg) => {
+                            return msg.id === message.id
+                        })
+                        messagetohide.deleted = true
+                    }
+
+                    if (method === "created") {
+                        message["deleted"] = false
+                        this.$data.messages.push(message)
+                        // console.log(message)
+                    }
+                }
+
+                self.$data.socket = socket
+            },
+            methods: {
+                viewthread: function (reference) {
+                    var self = this
+                    // console.log("VIEW THREAD")
+                    // var formdata = new FormData()
+
+                    var xhr = new XMLHttpRequest()
+                    xhr.responseType = "json"
+                    xhr.onloadend = function() {
+                        if (xhr.status === 200) {
+                            var newmessages = xhr.response.messages
+                            // _.forEach(newmessages, (message) => {
+                            //     message["deleted"] = false
+                            // })
+                            self.$data.messages = newmessages
+                            self.$data.currentthread = xhr.response.current_thread
+                            self.$data.threadisreported = xhr.response.is_reported
+                            self.newconnection(self.$data.currentthread)
+                        }
+                    }
+                    xhr.open("GET", "{% url 'forum:view_thread' %}?q=" + reference)
+                    xhr.send()
+
+                },
+                showemailmessage: function () {
+                    console.log("SHOW EMAIL MESSAGE")
+                },
+                newconnection: function (thread) {
+                    var self = this
+                    self.$data.socket.close()
+
+                    const base = socketprotocol + window.location.host
+                    const url = base + "/ws/forum/" + thread + "/"
+                    const socket = new WebSocket(url)
+
+                    console.log(socket)
+
+                    socket.onopen = (e) => {
+                        console.log("CONNECTED TO ANOTHER...")
+                    }
+
+                    socket.onmessage = (e) => {
+                        var method = JSON.parse(e.data)["method"]
+                        var message = JSON.parse(e.data)["message"]
+
+                        if (method === "created") {
+                            message["deleted"] = false
+                            this.$data.messages.push(message)
+                        }
+                    }
+
+                    self.$data.socket = socket
+                }
+            }
+        })
+</script>

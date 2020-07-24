@@ -17,7 +17,8 @@ services:
         build: ./docker/nginx
         container_name: "enginx"
         ports:
-            - 4000:8000
+            - 80:80
+            - 443:443
         networks:
             - my_network
 

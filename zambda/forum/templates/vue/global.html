@@ -1,0 +1,112 @@
+<script>
+    Vue.component("button-component", {
+        props: ["method", "icon", "name"],
+        delimiters: ["[[", "]]"],
+        template: `
+        <div @click="sendaction" class="btn white black-text">
+            <i class="material-icons left">[[ icon ]]</i>
+            [[ name ]]
+        </div>
+        `,
+        methods: {
+            sendaction: function (method) {
+                this.$emit("sendaction", this.$props.method)
+            }
+        }
+    })
+
+    Vue.component("message-card-component", {
+        props: ["messages", "socket"],
+        name: "MessageCard",
+        delimiters: ["[[", "]]"],
+        template: `
+        <div class="messages-window">
+            <transition-group name="message-card" tag="div">
+                <div v-for="(message, index) in list" 
+                                    :key="message.id" class="message" 
+                                        :class="highlight(message.user.username)">
+                    <div class="user">
+                        <a v-if="isnotcurrentuser(message.user.username)" 
+                                    href="{% url 'forum:private' request.user.username %}">
+                            [[ message.user.username ]]
+                        </a>
+                        <p v-else>[[ message.user.username ]]</p>
+                    </div>
+
+                    <div class="text">
+                        [[ message.message ]]
+                    </div>
+
+                    <i @click="deletemessage(index, message)" class="material-icons">
+                        delete
+                    </i>
+                </div>
+            </transition-group>
+        </div>
+        `,
+        computed: {
+            nondeletedmessages() {
+                return _.filter(this.list, (message) => {
+                    return message.deleted === false
+                })
+            },
+            list() {
+                return this.$props.messages
+            }
+        },
+        methods: {
+            deletemessage: function (index, message) {
+                // console.log("DELETE MESSAGE")
+                this.$props.socket.send(
+                    "{'method': 'delete', 'id':" + message.id + "}"
+                )
+            },
+            highlight: function (name) {
+                return {
+                    "grey lighten-4": this.iscurrentuser(name)
+                }
+            },
+            isnotcurrentuser: function (name) {
+                return "{{ request.user.username }}" !== name ? true : false
+            },
+            iscurrentuser: function (name) {
+                return "{{ request.user.username }}" === name ? true : false
+            }
+        }
+    })
+
+    Vue.component("action-buttons", {
+        props: ["currentthread"],
+        name: "ActionButtons",
+        delimiters: ["[[", "]]"],
+        template: `
+        <div class="btn-group">
+            <div @click="refreshpage" class="btn white black-text">
+                <i class="material-icons">refresh</i>
+            </div>
+            
+            <div @click="reportthread" class="btn white black-text">
+                <i class="material-icons left">block</i>
+                [[ currentthread ]]
+            </div>
+        </div>
+        `,
+        methods: {
+            refreshpage: function () {
+                window.location.reload()
+            },
+            reportthread: function () {
+                var self = this
+                var formdata = new FormData()
+
+                var xhr = new XMLHttpRequest()
+                xhr.responseType = "json"
+                xhr.onloadend = function () {
+                    window.location.reload()
+                }
+                xhr.open("POST", "{% url 'forum:report' thread.reference %}")
+                xhr.send(formdata)
+            }
+        }
+    })
+</script>
