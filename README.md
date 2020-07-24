@@ -6,6 +6,19 @@ __NOTE:__ This project uses VueJS for the front end. You will need to have known
 
 In case you need to deploy the application in a Docker environment, the template is shipped with all the required DockerFile and docker-compose files for just that.
 
+## Additional words
+
+The application is built a little bit like Intercom as opposed to a classic Chat application. In other words:
+
+* You can interact with a user via the live chat
+* Send email messages via the chat message like it were live messaging
+* Create threads with a new user
+* View or report a thread
+
+These are the basic functionnalities.
+
+__NOTE:__ On the emailing functionnaly, if the user replies to you and the message is marked as email, then your reply message will automatically be an email.
+
 # Organization
 
 The Pipfile comes with the following applications:
