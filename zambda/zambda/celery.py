@@ -19,22 +19,27 @@ app = Celery(
 )
 
 
-app.conf.beat_schedule = {
-    'custom_task': {
-        'task': 'custom_task',
-        # 'schedule': crontab(second='*/30'),
-        'schedule': 30.0,
-        'args': ('What'),
-    }
-}
+# app.conf.beat_schedule = {
+#     'custom_task': {
+#         'task': 'custom_task',
+#         'schedule': 30.0,
+#         'args': ('Something to be done',),
+#     },
+#     'check_for_emails_to_send': {
+#         'task': 'send_new_email',
+#         'schedule': crontab(minute=0, hour=0, day='*/1'),
+#         'args': ['Check for emails to send']
+#     }
+# }
+
 
 app.conf.timezone = 'UTC'
 
 
-@app.on_after_configure.connect
-def setup_periodic_tasks(sender, **kwargs):
-    sender.add_periodic_task(30.0, custom_periodic_task.s('hello'), name='Custom Periodic Task')
-
+# @app.on_after_configure.connect
+# def setup_periodic_tasks(sender, **kwargs):
+#     sender.add_periodic_task(30.0, custom_periodic_task.s('hello'), name='Custom Periodic Task')
+    
 @app.task
 def custom_task(name):
     print(f'This is what is done {name}')
@@ -42,4 +47,3 @@ def custom_task(name):
 @app.task
 def custom_periodic_task(name):
     print(f'This is what is done {name}')
-

@@ -56,3 +56,8 @@ You will need to run a redis server locally if you want to benefit from the full
 ## Celery
 
 The template also comes with celery and celery beat in order to create tasks or periodic tasks. For a local development, after running Redis, do `celery worker -A zambda -l info` to start the main process and `celery beat -A zambda -l info` for the scheduler.
+
+
+## Machine learning skeleton
+
+The template also comes with a RidgeClassifier ML models. The model classifies a message as sensitive or insensitive depending on its content.

@@ -32,31 +32,33 @@
             // this.$props.socket.close()
         },
         methods: {
+            reset: function () {
+                this.$data.newmessage = ""
+            },
             sendchatmessage: function () {
                 var self = this
-                var data = {
-                    method: "new", 
-                    thread: self.$props.currentthread,
-                    message: self.$data.newmessage
-                }
+                var data = self.basemessage()
+                data["email"] = false
+
                 self.$props.socket.send(JSON.stringify(data))
-                self.$data.newmessage = ""
+                self.reset()
             },
             sendemailmessage: function () {
-                console.log("NEW EMAIL MESSAGE")
-                // var self = this
-                // var formdata = new FormData()
-                // formdata.append("message", this.$data.newmessage)
-
-                // var xhr = new XMLHttpRequest()
-                // xhr.responseType = "json"
-                // xhr.onloadend = function () {
-                //     self.$data.newmessage = ""
-                //     self.$emit("sendemailmessage", xhr.response)
-                // }
-                // xhr.open("POST", "{% url 'forum:new' 'ac3368e402' %}")
-                // xhr.send(formdata)
+                var self = this
+                var emaildata = self.basemessage()
+                
+                emaildata["email"] = true
+                self.$props.socket.send(JSON.stringify(emaildata))
+                self.reset()
             },
+            basemessage: function () {
+                var data = {
+                    method: "new",
+                    thread: this.$props.currentthread,
+                    message: this.$data.newmessage
+                }
+                return data
+            }
         }
     }
 </script>

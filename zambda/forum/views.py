@@ -15,6 +15,15 @@ from forum import models, serializers, tasks, utilities
 MYUSER = get_user_model()
 
 
+def test_tasks_view(request):
+    tasks.send_new_email.delay(
+        'silede5221@retqio.com',
+        'This is a message'
+    )
+    return django_http.HttpResponse(
+        '<h1>Task was accomplished</h1>'
+    )
+
 class UsersView(generic.ListView):
     """
     List of users
@@ -77,13 +86,6 @@ def new_message(request, **kwargs):
     serialized_message = serializers.MessageSerializer(new_message)
     return django_http.JsonResponse(data=serialized_message.data)
 
-
-@csrf_exempt
-@http.require_POST
-def new_email_message(request):
-    method = request.POST.get('email')
-    message = request.POST.get('message')
-    tasks.delayed_send_email.delay(10)
 
 @csrf_exempt
 @http.require_POST

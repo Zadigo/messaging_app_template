@@ -37,7 +37,7 @@
                         [[ message.message ]]
                     </div>
 
-                    <i @click="deletemessage(index, message)" class="material-icons">
+                    <i v-if="iscurrentuser(message.user.username)" @click="deletemessage(index, message)" class="material-icons">
                         delete
                     </i>
                 </div>
@@ -56,10 +56,11 @@
         },
         methods: {
             deletemessage: function (index, message) {
-                // console.log("DELETE MESSAGE")
-                this.$props.socket.send(
-                    "{'method': 'delete', 'id':" + message.id + "}"
-                )
+                var data = {
+                    method: "delete",
+                    id: message.id
+                }
+                this.$props.socket.send(JSON.stringify(data))
             },
             highlight: function (name) {
                 return {
@@ -104,7 +105,7 @@
                 xhr.onloadend = function () {
                     window.location.reload()
                 }
-                xhr.open("POST", "{% url 'forum:report' thread.reference %}")
+                xhr.open("POST", "{% url 'forum:report' first_thread_reference %}")
                 xhr.send(formdata)
             }
         }

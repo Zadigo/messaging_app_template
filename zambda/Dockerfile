@@ -18,13 +18,8 @@ COPY . /app/
 
 EXPOSE 8000
 
-# Start project using a simple script file
-# ENTRYPOINT [ "../start/start.sh" ]
-# ...or with development server
+# Development server
 CMD [ "runserver", "0.0.0.0:8000" ]
 ENTRYPOINT [ "python", "/app/zambda/manage.py" ]
-# CMD pipenv run python manage.py runserver 0.0.0.0:8000
 # .. or ASGI server
 # CMD daphne zambda.asgi:application
-# ...or Gunicorn for production purposes
-# CMD gunicorn zambda.wsgi -w 4 -b 0.0.0.0:8000 --chdir=/app/zambda/ --log-file -
