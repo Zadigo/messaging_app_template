@@ -15,6 +15,7 @@ celery = "*"
 redis = "*"
 django-celery-beat = "*"
 django-extensions = "*"
+django-heroku = "*"
 
 [requires]
 python_version = "3.8"

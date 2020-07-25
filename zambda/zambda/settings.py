@@ -1,5 +1,4 @@
 import os
-# from celery.schedules import crontab
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -157,12 +156,19 @@ MEDIA_ROOT = 'media'
 
 EMAIL_HOST = 'smtp.gmail.com'
 
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'contact.nawoka@gmail.com')
 
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'lvpyhaunwpibmibi')
 
 EMAIL_USE_TLS = True
 
 EMAIL_PORT = 587
 
 EMAIL_USE_LOCALTIME = True
+
+try:
+    import django_heroku
+except:
+    pass
+else:
+    django_heroku.settings(locals())
