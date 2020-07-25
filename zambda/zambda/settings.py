@@ -72,7 +72,8 @@ CHANNEL_LAYERS = {
             # 'hosts': [('redis', 6379)],
             'hosts': [
                 ('127.0.0.1', 6379),
-                ('redis', 6379)
+                ('redis', 6379),
+                (os.environ.get('REDISCLOUD_URL'), 6379)
             ],
         },
     },
@@ -83,9 +84,17 @@ CHANNEL_LAYERS = {
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 DATABASES = {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    # }
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME', 'templat_messaging'),
+        'USER': os.environ.get('DB_USER', 'princess_messaging'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'princess_messaging'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': '5432',
     }
 }
 
