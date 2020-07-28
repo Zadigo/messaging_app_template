@@ -3,8 +3,8 @@ version: "3.5"
 services:
     zambda:
         build: ./zambda
-        container_name: "messaging_app"
-        command: python manage.py runserver 0.0.0.0:8000
+        
+container_name: "messaging_app"
         # environment: &env
         #     - REDIS_HOST=redis
         #     - CELERY_BROKER=redis://redis:6379/0
@@ -24,8 +24,6 @@ services:
         ports:
             - 80:80
             - 443:443
-	volumes:
-	    - zambda/allstatic:/static/allstatic
         networks:
             - my_network
 
