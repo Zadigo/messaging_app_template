@@ -6,6 +6,8 @@ services:
         container_name: "messaging_app"
         environment:
             - REDIS_HOST=redis
+            - CELERY_BROKER=redis://redis:6379/0
+            - CELERY_BACKEND=redis://redis:6379/0
         ports:
             - 8000:8000
         networks:
@@ -34,11 +36,9 @@ services:
 
     celery:
         build: ./zambda
-        container_name: "mycelery"
-        command: celery worker --app=zambda --loglevel=info
-        environment:
-            - CELERY_BROKER=redis://redis:6379/0
-            - CELERY_BACKEND=redis://redis:6379/0
+        image: *img
+        command: [celery worker --app=zambda --loglevel=info]
+        environment: *env
         volumes:
             - ./var/logs/celery:/usr/src/app
         depends_on:
@@ -49,22 +49,21 @@ services:
 
     celery-beat:
         build: ./zambda
-        command: celery -A zambda beat -l info
+        image: *img
+        command: [celery -A zambda beat -l info]
+        environment: *env
         volumes:
             - ./var/logs:/usr/src/app/
-        environment:
-            - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
         depends_on:
             - redis
 
     flower:
         build: ./zambda
+        image: *img
         command: flower -A zambda --port=5555 --broker=redis://redis:6379/0
+        environment: *env
         ports:
             - 5555:5555
-        environment:
-            - CELERY_BROKER=redis://redis:6379/0
-            - CELERY_BACKEND=redis://redis:6379/0
         depends_on:
             - zambda
             - redis
