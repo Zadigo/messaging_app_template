@@ -3,18 +3,19 @@ version: "3.5"
 services:
     zambda:
         build: ./zambda
-        image: &img
         container_name: "messaging_app"
-        environment: &env
-            - REDIS_HOST=redis
-            - CELERY_BROKER=redis://redis:6379/0
-            - CELERY_BACKEND=redis://redis:6379/0
+        # environment: &env
+        #     - REDIS_HOST=redis
+        #     - CELERY_BROKER=redis://redis:6379/0
+        #     - CELERY_BACKEND=redis://redis:6379/0
+        env_file:
+            - ./docker/env/global.env
         ports:
             - 8000:8000
-        networks:
-            - my_network
         volumes:
             - .:/app
+        networks:
+            - my_network
             
     enginx:
         build: ./docker/nginx
@@ -29,7 +30,7 @@ services:
         build: ./docker/redis
         container_name: "redis_database"
         ports:
-            - "6379:6379"
+            - 6379:6379
         volumes:
             - redis_data:/data
         networks:
@@ -37,34 +38,36 @@ services:
 
     celery:
         build: ./zambda
-        image: *img
-        command: [celery worker -A zambda -l info]
-        environment: *env
+        command: celery worker -A zambda -l info
+        env_file:
+            - ./docker/env/global.env
         depends_on:
             - zambda
             - redis
-        networks:
-            - my_network
         volumes:
             # - ./var/logs/celery:/usr/src/app
             - .:/app
+        networks:
+            - my_network
 
     celery-beat:
         build: ./zambda
-        image: *img
-        command: [celery beat -A zambda -l info]
-        environment: *env
+        command: celery beat -A zambda -l info
+        env_file:
+            - ./docker/env/global.env
         depends_on:
             - redis
         volumes:
             # - ./var/logs:/usr/src/app/
             - .:/app
+        networks:
+            - my_network
 
     flower:
         build: ./zambda
-        image: *img
-        command: [flower -A zambda --port=5555 --broker=redis://redis:6379/0]
-        environment: *env
+        command: flower -A zambda --port=5555 --broker=redis://redis:6379/0
+        env_file:
+            - ./docker/env/global.env
         ports:
             - 5555:5555
         depends_on:
