@@ -20,6 +20,6 @@ EXPOSE 8000
 
 # Development server
 CMD [ "runserver", "0.0.0.0:8000" ]
-ENTRYPOINT [ "python", "manage.py" ]
+ENTRYPOINT [ "python", "/app/manage.py" ]
 # .. or ASGI server
 # CMD daphne zambda.asgi:application
