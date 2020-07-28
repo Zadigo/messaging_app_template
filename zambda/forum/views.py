@@ -119,6 +119,7 @@ def create_thread(request, **kwargs):
     user_creating = request.user
     thread_name  = request.POST.get('name')
     users_to_link = request.POST.get('users')
+    private_or_public = request.POST.get('public')
 
     if not users_to_link:
         messages.error(request, "An error occured USE-NO")
@@ -130,6 +131,9 @@ def create_thread(request, **kwargs):
     users = MYUSER.objects.filter(username__in=users_to_link)
     if users.exists():
         thread = models.Thread.objects.create(name=thread_name, sender=user_creating)
+        if private_or_public:
+            thread.public = True
+            thread.save()
         thread.receivers.set(users)
 
     messages.error(request, "New thread created.")

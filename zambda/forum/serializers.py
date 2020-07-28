@@ -18,7 +18,7 @@ class SimpleThreadSerializer(Serializer):
 class ThreadSerializer(ModelSerializer):
     class Meta:
         model = models.Thread
-        fields = ['sender', 'name', 'receiver', 'reference', 'reported']
+        fields = ['sender', 'name', 'receiver', 'reference', 'reported', 'public']
 
 
 class MessageSerializer(ModelSerializer):

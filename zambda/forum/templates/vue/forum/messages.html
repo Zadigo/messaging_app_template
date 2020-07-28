@@ -152,9 +152,17 @@
         template: `
         <div class="windows">
             <div class="threads-window">
+                <div v-if="haspublicthreads" class="threads">
+                    <div @click="selectthread(thread)" 
+                            v-for="thread in publicthreads" :key="thread.reference" 
+                                class="thread" :class="reported(thread.reported)">
+                        # [[ thread.name  ]]
+                    </div>
+                </div>
+
                 <div class="threads">
                     <div @click="selectthread(thread)" 
-                            v-for="thread in threads" :key="thread.reference" 
+                            v-for="thread in privatethreads" :key="thread.reference" 
                                 class="thread" :class="reported(thread.reported)">
                         # [[ thread.name  ]]
                     </div>
@@ -174,6 +182,21 @@
             />
         </div>
         `,
+        computed: {
+            haspublicthreads() {
+                return this.publicthreads.length > 0 ? true : false
+            },
+            publicthreads() {
+                return _.filter(this.$props.threads, (thread) => {
+                    return thread.public === true
+                })
+            },
+            privatethreads() {
+                return _.filter(this.$props.threads, (thread) => {
+                    return thread.public === false
+                })
+            }
+        },
         methods: {
             selectthread: function (thread) {
                 this.$emit("selectthread", thread.reference)

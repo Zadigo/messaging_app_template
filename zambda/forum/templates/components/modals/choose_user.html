@@ -9,6 +9,15 @@
 
 {% block modal_content %}
     <form action="{% url 'forum:new_thread' %}" method="post">
+        <div class="switch">
+            <label>
+                Privé
+                <input type="checkbox" name="public">
+                <span class="lever"></span>
+                Public
+            </label>
+        </div>
+
         <div class="input-field">
             <input type="text" name="name" id="name">
         </div>
