@@ -34,6 +34,7 @@ services:
 
     celery:
         build: ./zambda
+	container_name: "mycelery"
         command: celery worker --app=zambda --loglevel=info
         environment:
             - CELERY_BROKER=redis://redis:6379/0

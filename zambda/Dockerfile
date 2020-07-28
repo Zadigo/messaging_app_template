@@ -7,19 +7,23 @@ LABEL name="messaging v1.0"
 
 WORKDIR /app
 
-# RUN pip install --upgrade pip
+RUN pip install --upgrade pip
 
-COPY Pipfile Pipfile.lock /app/
+COPY Pipfile Pipfile
+COPY Pipfile.lock Pipfile.lock
 
-RUN pip3 install "pipenv==2018.11.26"
+RUN pip3 install pipenv
 RUN pipenv install --deploy --system
+
+RUN ls -a
 
 COPY . /app/
 
-EXPOSE 8000
+RUN ls -a
+
+EXPOSE 8000 443
 
 # Development server
-CMD [ "runserver", "0.0.0.0:8000" ]
-ENTRYPOINT [ "python", "/app/manage.py" ]
+ENTRYPOINT [ "python", "manage.py", "runserver", "0.0.0.0:8000" ]
 # .. or ASGI server
 # CMD daphne zambda.asgi:application
