@@ -1,3 +1,5 @@
+{% load i18n %}
+
 <script>
     Vue.component("button-component", {
         props: ["method", "icon", "name"],
@@ -11,67 +13,6 @@
         methods: {
             sendaction: function (method) {
                 this.$emit("sendaction", this.$props.method)
-            }
-        }
-    })
-
-    Vue.component("message-card-component", {
-        props: ["messages", "socket"],
-        name: "MessageCard",
-        delimiters: ["[[", "]]"],
-        template: `
-        <div class="messages-window">
-            <transition-group name="message-card" tag="div">
-                <div v-for="(message, index) in list" 
-                                    :key="message.id" class="message" 
-                                        :class="highlight(message.user.username)">
-                    <div class="user">
-                        <a v-if="isnotcurrentuser(message.user.username)" 
-                                    href="{% url 'forum:private' request.user.username %}">
-                            [[ message.user.username ]]
-                        </a>
-                        <p v-else>[[ message.user.username ]]</p>
-                    </div>
-
-                    <div class="text">
-                        [[ message.message ]]
-                    </div>
-
-                    <i v-if="iscurrentuser(message.user.username)" @click="deletemessage(index, message)" class="material-icons">
-                        delete
-                    </i>
-                </div>
-            </transition-group>
-        </div>
-        `,
-        computed: {
-            nondeletedmessages() {
-                return _.filter(this.list, (message) => {
-                    return message.deleted === false
-                })
-            },
-            list() {
-                return this.$props.messages
-            }
-        },
-        methods: {
-            deletemessage: function (index, message) {
-                var data = {
-                    method: "delete",
-                    id: message.id
-                }
-                this.$props.socket.send(JSON.stringify(data))
-            },
-            highlight: function (name) {
-                return {
-                    "grey lighten-4": this.iscurrentuser(name)
-                }
-            },
-            isnotcurrentuser: function (name) {
-                return "{{ request.user.username }}" !== name ? true : false
-            },
-            iscurrentuser: function (name) {
-                return "{{ request.user.username }}" === name ? true : false
             }
         }
     })
@@ -105,7 +46,8 @@
                 xhr.onloadend = function () {
                     window.location.reload()
                 }
-                xhr.open("POST", "{% url 'forum:report' first_thread_reference %}")
+                
+                xhr.open("POST", "{ url 'forum:report' first_thread_reference }")
                 xhr.send(formdata)
             }
         }

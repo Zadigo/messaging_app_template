@@ -9,6 +9,10 @@
 
 {% block modal_content %}
     <form action="{% url 'forum:new_thread' %}" method="post">
+        <div class="input-field">
+            <input type="text" name="name" id="name">
+        </div>
+        
         {% for user in users %}
             <p>
                 <label>

@@ -9,8 +9,10 @@ MYUSER = get_user_model()
 
 class Thread(models.Model):
     reference = models.CharField(max_length=100, default=utilities.create_thread_reference(), blank=True, null=True)
+    name        = models.CharField(max_length=30, blank=True, null=True)
     sender   = models.ForeignKey(MYUSER, on_delete=models.CASCADE, blank=True, null=True, related_name='msg_sender')
     receiver    = models.ForeignKey(MYUSER, on_delete=models.CASCADE, blank=True, null=True, related_name='msg_receiver')
+    receivers     = models.ManyToManyField(MYUSER, blank=True)
     
     reported    = models.BooleanField(default=False)
     public      = models.BooleanField(default=False)
@@ -20,6 +22,11 @@ class Thread(models.Model):
 
     objects = models.Manager()
     custom_manager = managers.ThreadsManager().as_manager()
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['name', 'reference'])
+        ]
 
     def get_absolute_url(self):
         return reverse('thread', kwargs={'reference': self.reference})
@@ -36,6 +43,8 @@ class AbstractMessage(models.Model):
     thread      = models.ForeignKey(Thread, blank=True, on_delete=models.CASCADE)
     user        = models.ForeignKey(MYUSER, on_delete=models.CASCADE)
     message       = models.TextField(blank=True, null=True)
+    message_html = models.TextField(blank=True, null=True)
+    message_contents = models.TextField(blank=True, null=True)
     created_on      = models.DateField(auto_now_add=True)
 
     objects = models.Manager()
@@ -59,6 +68,11 @@ class Message(AbstractMessage):
 
     objects = models.Manager()
     custom_manager = managers.MessagesManager().as_manager()
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['message', 'message_html'])
+        ]
 
     def __str__(self):
         return self.thread.reference

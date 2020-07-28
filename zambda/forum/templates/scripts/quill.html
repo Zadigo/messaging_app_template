@@ -1,15 +1,12 @@
-<!-- Quill -->
-<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+{% load i18n %}
 
 <script>
-    var editor = new Quill(".editor-container", {
+    var editor = new Quill("#editor", {
         modules: {
             toolbar: [
-                [{ 'header': 1 }, { 'header': 2 }, { 'header': 3 }],
-                ['bold', 'italic'],
-                ['link'],
-                [{ list: 'ordered' }, { list: 'bullet' }],
-                ['clean'],
+                ["bold", "italic"],
+                ["link"],
+                [{ list: "ordered" }, { list: "bullet" }],
             ],
             history: {
                 delay: 2000,
@@ -33,15 +30,4 @@
     //     field.val(JSON.stringify(editor.getContents()))
     //     htmlfield.val(editorcontent)
     // })
-</script>
-
-<script>
-    var descriptionfield = $("input[name='description']")
-    var htmlfield = $("input[name='description_html'")
-
-    var htmleditor = new Vue({
-        el: "#vue_editor_app",
-        name: "QuillEditor",
-        
-    })
 </script>

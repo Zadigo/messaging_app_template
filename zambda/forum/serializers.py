@@ -10,6 +10,7 @@ class MyUserSerializer(Serializer):
 
 class SimpleThreadSerializer(Serializer):
     reference = fields.CharField(read_only=True)
+    name = fields.CharField()
     reported = fields.BooleanField(read_only=True)
     created_on = fields.DateField(read_only=True)
 
@@ -17,11 +18,11 @@ class SimpleThreadSerializer(Serializer):
 class ThreadSerializer(ModelSerializer):
     class Meta:
         model = models.Thread
-        fields = ['sender', 'receiver', 'reference', 'reported']
+        fields = ['sender', 'name', 'receiver', 'reference', 'reported']
 
 
 class MessageSerializer(ModelSerializer):
     user = MyUserSerializer()
     class Meta:
         model = models.Message
-        fields = ['id', 'user', 'message', 'created_on']
+        fields = ['id', 'user', 'message', 'message_html', 'created_on']

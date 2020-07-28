@@ -16,6 +16,7 @@ redis = "*"
 django-celery-beat = "*"
 django-extensions = "*"
 django-heroku = "*"
+zappa = "*"
 
 [requires]
 python_version = "3.8"

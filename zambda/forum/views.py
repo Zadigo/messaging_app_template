@@ -7,6 +7,8 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.views import generic
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.decorators import http
 from django.views.decorators.csrf import csrf_exempt
 
@@ -15,16 +17,16 @@ from forum import models, serializers, tasks, utilities
 MYUSER = get_user_model()
 
 
-def test_tasks_view(request):
-    tasks.send_new_email.delay(
-        'silede5221@retqio.com',
-        'This is a message'
-    )
-    return django_http.HttpResponse(
-        '<h1>Task was accomplished</h1>'
-    )
+# def test_tasks_view(request):
+#     tasks.send_new_email.delay(
+#         'silede5221@retqio.com',
+#         'This is a message'
+#     )
+#     return django_http.HttpResponse(
+#         '<h1>Task was accomplished</h1>'
+#     )
 
-class UsersView(generic.ListView):
+class UsersView(LoginRequiredMixin, generic.ListView):
     """
     List of users
     """
@@ -34,7 +36,7 @@ class UsersView(generic.ListView):
     context_object_name = 'users'
 
 
-class ForumView(generic.View):
+class ForumView(LoginRequiredMixin, generic.View):
     """
     Main entrypoint to access the forum
     """
@@ -58,11 +60,11 @@ class ForumView(generic.View):
             context.update({'vue_threads': serialized_threads.data})
             context.update({'vue_messages': serialized_messages.data})
             context.update({'first_thread_reference': first_thread.reference})
-
+        context.update({'user_has_threads': True if threads else False})
         return render(request, 'pages/messages.html', context=context) 
 
 
-class PrivateMessageView(generic.ListView):
+class PrivateMessageView(LoginRequiredMixin, generic.ListView):
     """
     Private messages or DM view
     """
@@ -88,6 +90,7 @@ def new_message(request, **kwargs):
 
 
 @csrf_exempt
+@login_required
 @http.require_POST
 def delete_message(request, **kwargs):
     """
@@ -110,9 +113,11 @@ def delete_message(request, **kwargs):
 
 
 @csrf_exempt
+@login_required
 @http.require_POST
 def create_thread(request, **kwargs):
     user_creating = request.user
+    thread_name  = request.POST.get('name')
     users_to_link = request.POST.get('users')
 
     if not users_to_link:
@@ -121,17 +126,17 @@ def create_thread(request, **kwargs):
 
     if isinstance(users_to_link, str):
         users_to_link = [users_to_link]
-    # TODO: For now try with only one user.
-    # In the future, allow multiple users.
-    user_to_link_object = get_object_or_404(MYUSER, username__iexact=users_to_link[:1][0])
-    models.Thread.objects.create(
-        sender=user_creating,
-        receiver=user_to_link_object
-    )
+
+    users = MYUSER.objects.filter(username__in=users_to_link)
+    if users.exists():
+        thread = models.Thread.objects.create(name=thread_name, sender=user_creating)
+        thread.receivers.set(users)
+
     messages.error(request, "New thread created.")
     return redirect('forum:forum')
 
 @csrf_exempt
+@login_required
 @http.require_POST
 def report_thread(request, **kwargs):
     thread = get_object_or_404(models.Message, reference=kwargs['reference'])
@@ -146,6 +151,7 @@ def report_thread(request, **kwargs):
     return django_http.JsonResponse(data={}, status=400)
 
 
+@login_required
 @http.require_GET
 def change_thread(request, **kwargs):
     reference = request.GET.get('q')
@@ -165,3 +171,6 @@ def change_thread(request, **kwargs):
         'is_reported': thread.reported
     }
     return django_http.JsonResponse(data=data)
+
+def add_user_to_thread(request):
+    pass

@@ -1,0 +1,188 @@
+{% load i18n %}
+
+<script>
+    var editorcomponent = {
+        props: ["currentthread", "socket"],
+        name: "Editor",
+        template: `
+        <div v-if='!threadreported' class='footer textarea'>
+            <div id="editor"></div>
+            
+            <button @click='sendemailmessage' class='btn'>
+                {% trans "New email message" %}
+            </button>
+
+            <button @click='sendchatmessage' class='btn red'>
+                {% trans "Chat message" %}
+            </button>
+        </div>
+        `,
+        data() {
+            return {
+                threadreported: false,
+                newmessage: "",
+            }
+        },
+        beforeDestroy() {
+            // this.$props.socket.close()
+        },
+        methods: {
+            reset: function () {
+                this.$data.newmessage = ""
+            },
+            sendchatmessage: function () {
+                var self = this
+                var data = self.basemessage()
+                data["email"] = false
+
+                self.$props.socket.send(JSON.stringify(data))
+                self.reset()
+            },
+            sendemailmessage: function () {
+                var self = this
+                var emaildata = self.basemessage()
+
+                emaildata["email"] = true
+                self.$props.socket.send(JSON.stringify(emaildata))
+                self.reset()
+            },
+            basemessage: function () {
+                var textcontent = editor.getText()
+                var htmlcontent = editor.root.innerHTML
+                var editorcontent = JSON.stringify(editor.getContents())
+
+                var data = {
+                    method: "new",
+                    thread: this.$props.currentthread,
+                    message: textcontent,
+                    html: htmlcontent,
+                    contents: editorcontent
+                }
+                // console.log(data)
+                editor.setText("")
+                return data
+            }
+        }
+    }
+
+    // Vue.component("messages-component", {
+    var messagescomponent = {
+        props: ["messages", "socket", "currentthread"],
+        name: "Messages",
+        components: {
+            "editor-component": editorcomponent
+        },
+        delimiters: ["[[", "]]"],
+        template: `
+        <div class="messages-window">
+            <div class="messages">
+                <transition-group name="message-card" tag="div">
+                    <div v-for="(message, index) in nondeletedmessages" 
+                                        :key="message.id" class="message" 
+                                            :class="highlight(message.user.username)">
+                        <div class="user">
+                            <a v-if="isnotcurrentuser(message.user.username)" 
+                                        href="{% url 'forum:private' request.user.username %}">
+                                [[ message.user.username ]]
+                            </a>
+                            <p v-else>[[ message.user.username ]]</p>
+                        </div>
+
+                        <div class="text">
+                            [[ message.message_html ]]
+                        </div>
+
+                        <i v-if="iscurrentuser(message.user.username)" 
+                                @click="deletemessage(index, message)" 
+                                        class="material-icons">
+                            delete
+                        </i>
+                    </div>
+                </transition-group>
+            </div>
+
+            <div class="footer">
+                <editor-component 
+                    :socket="socket"
+                    :currentthread="currentthread">
+                </editor-component>
+            </div>
+        </div>
+        `,
+        computed: {
+            nondeletedmessages() {
+                return _.filter(this.list, (message) => {
+                    return message.deleted === false
+                })
+            },
+            list() {
+                return this.$props.messages
+            }
+        },
+        methods: {
+            deletemessage: function (index, message) {
+                var data = {
+                    method: "delete",
+                    id: message.id
+                }
+                message.deleted = true
+                this.$props.socket.send(JSON.stringify(data))
+            },
+            highlight: function (name) {
+                return {
+                    "grey lighten-4": this.iscurrentuser(name)
+                }
+            },
+            isnotcurrentuser: function (name) {
+                return "{{ request.user.username }}" !== name ? true : false
+            },
+            iscurrentuser: function (name) {
+                return "{{ request.user.username }}" === name ? true : false
+            }
+        }
+    }
+
+    var maininterface = {
+        props: ["threads", "messages", "currentthread", "socket"],
+        name: "MainInterface",
+        components: {
+            "messages-component": messagescomponent
+        },
+        delimiters: ["[[", "]]"],
+        template: `
+        <div class="windows">
+            <div class="threads-window">
+                <div class="threads">
+                    <div @click="selectthread(thread)" 
+                            v-for="thread in threads" :key="thread.reference" 
+                                class="thread" :class="reported(thread.reported)">
+                        # [[ thread.name  ]]
+                    </div>
+                </div>
+                
+                <div class="footer">
+                    <a class="btn modal-trigger" href="#choose_user">
+                        {% trans "Create thread" %}
+                    </a>
+                </div>
+            </div>
+            
+            <messages-component 
+                v-bind:messages="messages"
+                v-bind:socket="socket"
+                v-bind:currentthread="currentthread"
+            />
+        </div>
+        `,
+        methods: {
+            selectthread: function (thread) {
+                this.$emit("selectthread", thread.reference)
+            },
+            reported: function (state) {
+                return {
+                    "red": state ? true : false
+                }
+            }
+        }
+    }
+</script>

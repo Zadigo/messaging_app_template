@@ -28,9 +28,13 @@ The Pipfile comes with the following applications:
 * Celery
 * Celery Beat
 * Channels
-* Channels redis
+* Channels Redis
 * Daphne
 * Django extensions
+* Zappa
+* Django Heroku
+* Boto3
+* Social Django
 
 ## Models
 
@@ -55,9 +59,20 @@ You will need to run a redis server locally if you want to benefit from the full
 
 ## Celery
 
-The template also comes with celery and celery beat in order to create tasks or periodic tasks. For a local development, after running Redis, do `celery worker -A zambda -l info` to start the main process and `celery beat -A zambda -l info` for the scheduler.
+The template also comes with celery and celery beat in order to create tasks or periodic tasks. For a local development, after running Redis, do `celery worker -A zambda -l info` to start the main process and `celery beat -A zambda -l info` for the scheduler in a terminal of your choice.
 
 
-## Machine learning skeleton
+# Deployments
+
+## Docker
+
+To run this app with Docker simply run `docker-compose build` or `docker-compose build service_name`. Do `docker-compose up` or `start`.  
+
+## Server-less
+
+The application comes directly with Zappa. To deploy in server-less configuration you will need to have an AWS account [in which you must have created an S3 bucket and optionally EC2, VPC, Route 53 an RDS instances]. Run `zappa init` and then `zappa deploy`.
+
+
+# Machine learning skeleton
 
 The template also comes with a RidgeClassifier ML models. The model classifies a message as sensitive or insensitive depending on its content.

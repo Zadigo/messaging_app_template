@@ -2,24 +2,23 @@
 {% load i18n static %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'messages.css' %}">
     <link rel="stylesheet" href="{% static 'transitions.css' %}">
 {% endblock %}
 
 {% block body %}
-<h3>{{ user.get_full_name }}</h3>
+<h4>{{ user.get_full_name }}</h4>
 <section class="section">
     <div id="vue_messages_app">
         <section class="section forum">
-            <div class="row">
+            <!-- <div class="row">
                 <div class="col s12 m12 l12">
                     <action-buttons v-bind:currentthread="currentthread" />
                 </div>
-            </div>
+            </div>                 -->
 
             <div class="row">
                 <div class="col s12 m12 l12">
-                    <messagesinterface 
+                    <maininterface 
                         @selectthread="viewthread" 
                         v-bind:messages="messages" 
                         v-bind:threads="threads" 
@@ -28,9 +27,6 @@
                     />
                 </div>
             </div>                
-
-            <!-- EDITOR -->
-            {% include "components/editor.html" %}
         </section>
 
         <!-- MODAL -->
@@ -47,6 +43,7 @@
     <!-- GLOBAL -->
     {% include "vue/global.html" %}
     <!-- MESSAGE -->
-    {# {% include "vue/message.html" %} #}
-    {% include "vue/base.html" %}
+    {% include "vue/forum/base.html" %}
+    <!-- QUILL -->
+    {% include "scripts/quill.html" %}
 {% endblock %}

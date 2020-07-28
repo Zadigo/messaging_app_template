@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -8,6 +10,9 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+        <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+        <link rel="stylesheet" href="{% static 'messages.css' %}">
 
         {% block extra_css %}{% endblock %}
     </head>
@@ -34,6 +39,8 @@
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
     <script>
         $(document).ready(function () {

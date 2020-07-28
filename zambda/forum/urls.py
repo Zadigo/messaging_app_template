@@ -5,7 +5,7 @@ from forum import views
 app_name = 'forum'
 
 urlpatterns = [
-    url(r'^test', views.test_tasks_view, name='testing'),
+    # url(r'^test', views.test_tasks_view, name='testing'),
 
     url(r'^thread/create$', views.create_thread, name='new_thread'),
     url(r'^thread/view$', views.change_thread, name='view_thread'),

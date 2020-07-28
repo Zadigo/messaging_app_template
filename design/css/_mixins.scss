@@ -1,0 +1,44 @@
+$card_transition: all .3s ease;
+
+@mixin window_mixin($height: 400px, $background: none, $padding: .75rem) {
+    position: relative;
+    height: $height;
+    text-align:justify;
+    padding: $padding;
+    margin-bottom: 1rem;
+
+    @if ($background != none) {
+        background-color: $background;
+    } @else {
+        background-color: $base_background_color;
+    }
+
+    min-width: 20%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    .footer:not(.textarea) {
+        .btn, .btn-large {
+            width: 100%;
+        }
+
+    }
+}
+
+@mixin simple_card {
+    background-color: $message_card_background;
+    transition: $card_transition;
+    border-radius: $message_card_border_radius;
+    cursor: pointer;
+    margin-top: $message_card_top_margin;
+}
+
+@mixin theme_mixin($variant) {
+    background-color: map-get($map: $theme_colors, $key: $variant);
+
+    a:hover, .card:hover {
+        background-color: map-get($map: $theme_hover_colors, $key: $variant);
+    }
+}

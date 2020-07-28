@@ -1,0 +1,9 @@
+{
+    "dev": {
+        "django_settings": "zambda.settings",
+        "profile_name": "johnpmholdings",
+        "project_name": "zambda",
+        "runtime": "python3.8",
+        "s3_bucket": "zappa-49pl1kae6"
+    }
+}

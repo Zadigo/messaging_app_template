@@ -5,21 +5,21 @@
         props: ["socket"],
         props: ["currentthread", "showmessagebox", "socket"],
         template: `
-        <div v-if='!threadreported' class='row'>
-            <div class='col s12 m12 l12'>
-                <textarea v-model='newmessage' 
-                    name='message' id='message-textbox' 
-                        cols='30' rows='100'>
-                </textarea>
-                
-                <button @click='sendemailmessage' class='btn-large'>
-                    {% trans "New email message" %}
-                </button>
+        <div v-if='!threadreported' class='footer textarea'>
+            <textarea v-model='newmessage' 
+                name='message' id='message-textbox' 
+                    cols='30' rows='100'>
+            </textarea>
 
-                <button @click='sendchatmessage' class='btn-large red'>
-                    {% trans "Chat message" %}
-                </button>
-            </div>
+            <div id="editor"></div>
+            
+            <button @click='sendemailmessage' class='btn'>
+                {% trans "New email message" %}
+            </button>
+
+            <button @click='sendchatmessage' class='btn red'>
+                {% trans "Chat message" %}
+            </button>
         </div>
         `,
         data() {

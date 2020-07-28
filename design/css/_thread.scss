@@ -1,0 +1,12 @@
+.thread {
+    @include simple_card;
+    height: 50px;
+    padding: .5rem;
+    text-align: center;
+    line-height: 2;
+    font-weight: $thread_font_weight;
+
+    &:hover {
+        background-color: red($color: #000000);
+    }
+}

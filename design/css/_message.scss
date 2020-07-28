@@ -1,0 +1,47 @@
+.message {
+    position: relative;
+    background-color: $message_card_background;
+    border: $message_card_border;
+    border-radius: $message_card_border_radius;
+    height: auto;
+    width: 100%;
+    padding: $message_card_padding;
+    transition: transform .3s ease;
+
+    width: 90%;
+    margin: 0 auto;
+
+    .text {
+        max-width: 90%;
+    }
+
+    i {
+        position: absolute;
+        font-size: 20px;
+        top: 15px;
+        right: 15px;
+        cursor: pointer;
+        color: #9e9e9e;
+        border-radius: 50%;
+        height: 30px;
+        width: 30px;
+        text-align: center;
+        line-height: 1.5;
+        transition: all .3s ease;
+
+        &:hover {
+            background-color: #e0e0e0;
+            color: rgba($color: #9e9e9e, $alpha: 0.7);
+        }
+    }
+
+    &:hover {
+        cursor: pointer;
+        // box-shadow: $message_card_shadow;
+        transform: translateX(5px);
+    }
+
+    &:not(:first-child) {
+        margin-top: $message_card_top_margin;
+    }
+}

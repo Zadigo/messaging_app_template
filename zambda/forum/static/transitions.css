@@ -20,3 +20,24 @@
     opacity: 1;
     transform: scale(1);
 }
+.message-card-leave-active {
+    transition: all .3s ease-out;
+}
+.message-card-leave {
+    opacity: 1;
+}
+.message-card-leave-to {
+    animation: slide;
+    opacity: 0;
+}
+.message-card-move {
+    transition: all .3s ease;
+}
+@keyframes slide {
+    0% {
+        transform: translateY(-5px);
+    }
+    100% {
+        transform: translateX(-15px);
+    }
+}

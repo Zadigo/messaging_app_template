@@ -30,8 +30,6 @@ class ChatConsumer(websocket.JsonWebsocketConsumer):
         )
 
     def receive(self, text_data):
-        print(text_data)
-        # transformed_dict = ast.literal_eval(text_data)
         transformed_dict = json.loads(text_data)
 
         method = transformed_dict['method']
@@ -43,9 +41,16 @@ class ChatConsumer(websocket.JsonWebsocketConsumer):
         else:
             if method == 'new':
                 message = transformed_dict['message']
+                html = transformed_dict['html']
+                contents = transformed_dict['contents']
                 is_email = transformed_dict['email']
 
-                serialized_message = self.create_in_database(message, email=is_email)
+                serialized_message = self.create_in_database(
+                    message, 
+                    html, 
+                    contents, 
+                    email=is_email
+                )
                 # Send message to thread
                 async_to_sync(self.channel_layer.group_send)(
                     self.thread_name,
@@ -71,13 +76,18 @@ class ChatConsumer(websocket.JsonWebsocketConsumer):
             'message': message
         }))
 
-    def create_in_database(self, message, email=False):
+    def create_in_database(self, message, html, contents, email=False):
         try:
             thread = models.Thread.objects.get(reference=self.thread_reference)
         except:
             self.close()
         else:
-            message = thread.message_set.create(user=self.user, message=message)
+            message = thread.message_set.create(
+                user=self.user,
+                message=message,
+                message_html=html,
+                message_contents=contents
+            )
 
             if email:
                 message.email = True

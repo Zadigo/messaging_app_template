@@ -1,0 +1,68 @@
+// COLORS
+
+$white: white;
+$black: black;
+
+$editor_border_color: #ccc;
+
+$theme_colors: () !default;
+$theme_colors: map-merge((
+    "variant1": #4D394B,
+    "variant2": #F8F8FA,
+    "variant3": #0D7E83,
+    "variant4": #544538,
+    "variant5": #303E4D,
+    "variant6": #4D5250,
+), $theme_colors);
+
+$theme_hover_colors: (
+    "variant1": #3E313C,
+    "variant2": #FFFFFF,
+    "variant3": #D37C71,
+    "variant4": #4A3C30,
+    "variant5": #4A5664,
+    "variant6": #434745,
+);
+
+$sidebar_color: map-get($map: $theme_colors, $key: "variant3");
+$hover_color: map-get($map: $theme_hover_colors, $key: "variant3");
+
+
+$base_background_color: #fafafa;
+$threads_window_background_color: #e0e0e0;
+
+$message_card_background: $white;
+
+
+// FONTS
+
+$base_font_family: "Roboto";
+
+$base_font_size: 1rem;
+
+$base_font_weight: 300;
+
+$thread_font_weight: 500;
+
+
+// MESSAGES CARD
+
+$message_card_border: 1px solid #e0e0e0;
+$message_card_border_radius: 2px;
+
+
+// SHADDOWS
+
+$message_card_shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+
+
+// PADDING
+
+$message_card_padding: 1rem;
+
+$messages_window_padding: 1rem;
+
+
+// MARGIN
+
+$message_card_top_margin: .5rem;
