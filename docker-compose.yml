@@ -3,8 +3,9 @@ version: "3.5"
 services:
     zambda:
         build: ./zambda
+        image: &img
         container_name: "messaging_app"
-        environment:
+        environment: &env
             - REDIS_HOST=redis
             - CELERY_BROKER=redis://redis:6379/0
             - CELERY_BACKEND=redis://redis:6379/0
@@ -37,7 +38,7 @@ services:
     celery:
         build: ./zambda
         image: *img
-        command: [celery worker --app=zambda --loglevel=info]
+        command: [celery worker -A zambda -l info]
         environment: *env
         volumes:
             - ./var/logs/celery:/usr/src/app
@@ -50,7 +51,7 @@ services:
     celery-beat:
         build: ./zambda
         image: *img
-        command: [celery -A zambda beat -l info]
+        command: [celery beat -A zambda -l info]
         environment: *env
         volumes:
             - ./var/logs:/usr/src/app/
