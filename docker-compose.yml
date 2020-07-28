@@ -24,8 +24,8 @@ services:
         ports:
             - 80:80
             - 443:443
-	volumes:
-	    - zambda/allstatic:/static/allstatic
+        volumes:
+            - zambda/allstatic:/static/allstatic
         networks:
             - my_network
 
