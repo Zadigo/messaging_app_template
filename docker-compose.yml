@@ -58,7 +58,7 @@ services:
 
     flower:
         build: ./zambda
-        command:  flower -A zambda --port=5555 --broker=redis://redis:6379/0
+        command: flower -A zambda --port=5555 --broker=redis://redis:6379/0
         ports:
             - 5555:5555
         environment:
