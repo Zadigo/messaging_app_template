@@ -4,11 +4,12 @@ import celery
 from django import http as django_http
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core import exceptions
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.views import generic
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.decorators import http
 from django.views.decorators.csrf import csrf_exempt
 
@@ -26,21 +27,14 @@ MYUSER = get_user_model()
 #         '<h1>Task was accomplished</h1>'
 #     )
 
-class UsersView(LoginRequiredMixin, generic.ListView):
-    """
-    List of users
-    """
-    model = MYUSER
-    queryset = MYUSER.objects.filter(is_active=True)
-    template_name = 'pages/users.html'
-    context_object_name = 'users'
-
 
 class ForumView(LoginRequiredMixin, generic.View):
     """
     Main entrypoint to access the forum
     """
     def get(self, request, *args, **kwargs):
+        # TODO: The queryset does not return threads where the
+        # user has been specifically added by another user
         threads = models.Thread.custom_manager.mythreads(request)
         context = {
             'users': MYUSER.objects.exclude(username__iexact=request.user.username),
@@ -48,7 +42,13 @@ class ForumView(LoginRequiredMixin, generic.View):
         if threads:
             has_already_selected_thread = request.session.get('current_thread', None)
             if has_already_selected_thread:
-                first_thread = threads.get(reference=has_already_selected_thread)
+                try:
+                    # We use this try catch in case there is a stale reference
+                    # in the session of a thread which the status has changed
+                    # e.g. the user is not part of anymore.
+                    first_thread = threads.get(reference=has_already_selected_thread)
+                except exceptions.ObjectDoesNotExist:
+                    first_thread = threads.first()
             else:
                 first_thread = threads.first()
 

@@ -94,9 +94,7 @@
                             <p v-else>[[ message.user.username ]]</p>
                         </div>
 
-                        <div class="text">
-                            [[ message.message_html ]]
-                        </div>
+                        <div class="text" v-html="message.message_html"></div>
 
                         <i v-if="iscurrentuser(message.user.username)" 
                                 @click="deletemessage(index, message)" 

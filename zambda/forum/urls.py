@@ -13,10 +13,8 @@ threadpatterns = [
 ]
 
 urlpatterns = [
-    # url(r'^test', views.test_tasks_view, name='testing'),
     path('thread/', include((threadpatterns, app_name), namespace='thread')),
 
     url(r'^users/(?P<username>\w+)/private$', views.PrivateMessageView.as_view(), name='private'),
-    url(r'^users$', views.UsersView.as_view(), name='users'),
     url(r'^$', views.ForumView.as_view(), name='forum')
 ]
