@@ -8,35 +8,29 @@
 {% block modal_id %}choose_user{% endblock %}
 
 {% block modal_content %}
-    <form action="{% url 'forum:new_thread' %}" method="post">
-        <div class="switch">
-            <label>
-                Privé
-                <input type="checkbox" name="public">
-                <span class="lever"></span>
-                Public
-            </label>
+    <form action="{% url 'forum:thread:add_user' %}" method="post" id="choose_user_modal">        
+        
+        <div class="input-field">            
+            {% for user in users %}
+                <p>
+                    <label>
+                        <input type="checkbox" id="user" name="user" value="{{ user.username }}">
+                        <span>
+                            <div class="card-panel">
+                                {{ user.username }}
+                            </div>
+                        </span>
+                    </label>
+                </p>
+            {% endfor %}
         </div>
 
         <div class="input-field">
-            <input type="text" name="name" id="name">
+            <input type="hidden" name="reference" value="">
         </div>
-        
-        {% for user in users %}
-            <p>
-                <label>
-                    <input type="checkbox" id="user" name="users" value="{{ user.username }}">
-                    <span>
-                        <div class="card-panel">
-                            {{ user.username }}
-                        </div>
-                    </span>
-                </label>
-            </p>
-        {% endfor %}
 
         <button type="submit" class="btn btn-large waves-effect waves-light">
-            {% trans "Create thread" %}
+            {% trans "Add user" %}
         </button>
     </form>
 {% endblock %}

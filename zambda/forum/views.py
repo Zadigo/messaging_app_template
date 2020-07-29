@@ -75,21 +75,6 @@ class PrivateMessageView(LoginRequiredMixin, generic.ListView):
 
 
 @csrf_exempt
-@http.require_POST
-def new_message(request, **kwargs):
-    """
-    Post a new message to the thread
-    """
-    message = request.POST.get('message')
-
-    selected_thread = models.Message.objects.get(reference=kwargs['reference'])
-    new_message = selected_thread.message_set.create(message=message)
-
-    serialized_message = serializers.MessageSerializer(new_message)
-    return django_http.JsonResponse(data=serialized_message.data)
-
-
-@csrf_exempt
 @login_required
 @http.require_POST
 def delete_message(request, **kwargs):
@@ -118,25 +103,14 @@ def delete_message(request, **kwargs):
 def create_thread(request, **kwargs):
     user_creating = request.user
     thread_name  = request.POST.get('name')
-    users_to_link = request.POST.get('users')
     private_or_public = request.POST.get('public')
 
-    if not users_to_link:
-        messages.error(request, "An error occured USE-NO")
-        return redirect('forum:forum')
-
-    if isinstance(users_to_link, str):
-        users_to_link = [users_to_link]
-
-    users = MYUSER.objects.filter(username__in=users_to_link)
-    if users.exists():
-        thread = models.Thread.objects.create(name=thread_name, sender=user_creating)
-        if private_or_public:
-            thread.public = True
-            thread.save()
-        thread.receivers.set(users)
-
-    messages.error(request, "New thread created.")
+    thread = models.Thread.objects.create(name=thread_name, sender=user_creating)
+    if private_or_public:
+        thread.public = True
+        thread.save()
+        
+    messages.success(request, "New thread created", extra_tags='alert-success')
     return redirect('forum:forum')
 
 @csrf_exempt
@@ -176,5 +150,26 @@ def change_thread(request, **kwargs):
     }
     return django_http.JsonResponse(data=data)
 
+@csrf_exempt
+@login_required
+@http.require_POST
 def add_user_to_thread(request):
-    pass
+    # BUG: With materialize checkbox,
+    # can only retrieve one user from
+    # the list of users
+    reference = request.POST.get('reference')
+    users_to_link = request.POST.get('user')
+
+    if not users_to_link:
+        messages.error(request, "An error occured USE-NO")
+        return redirect('forum:forum')
+
+    if isinstance(users_to_link, str):
+        users_to_link = [users_to_link]
+
+    users = MYUSER.objects.filter(username__in=users_to_link)
+    if users.exists():
+        thread = models.Thread.objects.get(reference=reference)
+        thread.receivers.set(users, clear=True)
+
+    return redirect('forum:forum')

@@ -29,8 +29,9 @@
             </div>                
         </section>
 
-        <!-- MODAL -->
+        <!-- MODALS -->
         {% include "components/modals/choose_user.html" %}
+        {% include "components/modals/create_thread.html" %}
 
         <div class="csrf">{% csrf_token %}</div>
     </div>
@@ -46,4 +47,8 @@
     {% include "vue/forum/base.html" %}
     <!-- QUILL -->
     {% include "scripts/quill.html" %}
+{% endblock %}
+
+{% block extra_scripts %}
+    <script src="{% static 'reconnecting_socket.js' %}"></script>
 {% endblock %}

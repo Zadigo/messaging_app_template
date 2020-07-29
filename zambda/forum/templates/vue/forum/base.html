@@ -47,12 +47,11 @@
                 const base = socketprotocol + window.location.host
                 const url = base + "/ws/forum/" + this.$data.currentthread + "/"
                 const socket = new WebSocket(url)
+                // const socket = new ReconnectingWebSocket(url)
     
-                console.log(socket)
+                // console.log(socket)
     
-                socket.onopen = (e) => {
-                    console.log("CONNECTED...")
-                }
+                socket.onopen = (e) => {}
     
                 socket.onmessage = (e) => {
                     var method = JSON.parse(e.data)["method"]
@@ -70,6 +69,14 @@
                         message["deleted"] = false
                         this.$data.messages.push(message)
                     }
+                }
+
+                socket.onerror = (e) => { 
+                    $("#socket-messages").find(".message").text(function () {
+                        $(this).parent().removeClass("hide")
+                        return "There was a problem starting the discussion thread"
+                    })
+                    socket.close() 
                 }
     
                 self.$data.socket = socket
@@ -97,7 +104,7 @@
                         self.newconnection(self.$data.currentthread)
                     }
                 }
-                xhr.open("GET", "{% url 'forum:view_thread' %}?q=" + reference)
+                xhr.open("GET", "{% url 'forum:thread:view' %}?q=" + reference)
                 xhr.send()
 
             },
@@ -111,12 +118,11 @@
                 const base = socketprotocol + window.location.host
                 const url = base + "/ws/forum/" + thread + "/"
                 const socket = new WebSocket(url)
+                // const socket = new ReconnectingWebSocket(url)
 
-                console.log(socket)
+                // console.log(socket)
 
-                socket.onopen = (e) => {
-                    console.log("CONNECTED TO ANOTHER...")
-                }
+                socket.onopen = (e) => {}
 
                 socket.onmessage = (e) => {
                     var method = JSON.parse(e.data)["method"]
@@ -126,6 +132,14 @@
                         message["deleted"] = false
                         this.$data.messages.push(message)
                     }
+                }
+
+                socket.onerror = (e) => {
+                    $("#socket-messages").find(".message").text(function () {
+                        $(this).parent().removeClass("hide")
+                        return "There was a problem starting the discussion thread"
+                    })
+                    socket.close()
                 }
 
                 self.$data.socket = socket

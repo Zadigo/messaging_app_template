@@ -75,6 +75,12 @@
         delimiters: ["[[", "]]"],
         template: `
         <div class="messages-window">
+            <div class=header>
+                <a @click="putreference" class="modal-trigger" href="#choose_user">
+                    {% trans "Add user" %}
+                </a>
+            </div>
+
             <div class="messages">
                 <transition-group name="message-card" tag="div">
                     <div v-for="(message, index) in nondeletedmessages" 
@@ -138,6 +144,9 @@
             },
             iscurrentuser: function (name) {
                 return "{{ request.user.username }}" === name ? true : false
+            },
+            putreference() {
+                $("#choose_user_modal").find("input[type='hidden']").val(this.$props.currentthread)
             }
         }
     }
@@ -169,7 +178,7 @@
                 </div>
                 
                 <div class="footer">
-                    <a class="btn modal-trigger" href="#choose_user">
+                    <a class="btn modal-trigger" href="#create_thread">
                         {% trans "Create thread" %}
                     </a>
                 </div>

@@ -1,0 +1,30 @@
+{% extends "components/modals/base.html" %}
+{% load i18n %}
+
+{% block modal_title %}
+    {% trans "Create thread" %}
+{% endblock %}
+
+{% block modal_id %}create_thread{% endblock %}
+
+{% block modal_content %}
+<form action="{% url 'forum:thread:new' %}" method="post">
+    
+    <div class="input-field">
+        <input type="text" name="name" id="name">
+    </div>
+    
+    <div class="switch">
+        <label>
+            Privé
+            <input type="checkbox" name="public">
+            <span class="lever"></span>
+            Public
+        </label>
+    </div>
+    
+    <button type="submit" class="btn btn-large waves-effect waves-light">
+        {% trans "Create thread" %}
+    </button>
+</form>
+{% endblock %}
