@@ -13,7 +13,7 @@ SECRET_KEY = 'j5%hd@v_)bh)(-c1fdm4^e6doxh78m^u2mt8f-#3fhssx#6+fy'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1', 'johnpm.fr']
 
 
 # Application definition
@@ -70,8 +70,7 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
             'hosts': [
-                ('127.0.0.1', 6379),
-                # ('redis', 6379),
+                (os.environ.get('REDIS_HOST', '127.0.0.1'), 6379),
                 # (os.environ.get('REDISCLOUD_URL'), 6379)
             ],
         },
