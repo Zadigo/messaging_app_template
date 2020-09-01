@@ -1,0 +1,14 @@
+{% extends "pages/registration/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Créer un compte" %}{% endblock title %}
+
+{% block section_id %}signup{% endblock %}
+
+{% block registration_form %}
+    {% include "components/registration/form.html" with form_id="signup_form" button_name="S'enregistrer" %}
+{% endblock registration_form %}
+
+{% block extra_registration_links %}
+    {% include "components/registration/p_tag.html" with text="Registered with us already?" href="accounts:login" action_text="Login here" %}
+{% endblock extra_registration_links %}
