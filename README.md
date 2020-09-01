@@ -76,3 +76,10 @@ The application comes directly with Zappa. To deploy in server-less configuratio
 # Machine learning skeleton
 
 The template also comes with a RidgeClassifier ML models. The model classifies a message as sensitive or insensitive depending on its content.
+
+
+# Support / Development
+
+I will be updating and pushing new features on the different templates on a regular basis. Do not hesitate to watch and star :heart:
+
+If you are interested in me participating in some other projects for you relate to the current work that I have done I am currently available for remote and on-site consulting for small, large and enterprise teams. Please contact me at pendenquejohn@gmail.com with your needs and let's work together!
