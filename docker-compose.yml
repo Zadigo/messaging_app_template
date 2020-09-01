@@ -80,6 +80,14 @@ services:
         networks:
             - my_network
 
+    nginx-proxy:
+        image: jwilder/nginx-proxy
+        container_name: nginx-proxy
+        ports:
+        - "80:80"
+        volumes:
+        - /var/run/docker.sock:/tmp/docker.sock:ro
+
 volumes:
     redis_data: {}
 
